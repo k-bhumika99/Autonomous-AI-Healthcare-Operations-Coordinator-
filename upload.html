@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dataset Management — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/main.js" defer></script>
+    <script src="/static/js/upload.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg>
+                </div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link active"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Scenarios</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <div style="margin-bottom: 28px;">
+                <h2 style="font-size: 24px; font-weight: 800; color: #1E1B4B;">Dataset Management</h2>
+                <p style="font-size: 14px; color: #64748B;">Upload, validate, and activate hospital operational datasets. Uploaded data becomes the live database source.</p>
+            </div>
+
+            <!-- Upload Dropzone Box -->
+            <div class="content-card">
+                <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">+ Upload Dataset</h3>
+
+                <div id="datasetDropzone" style="border: 2px dashed #CBD5E1; border-radius: 20px; padding: 48px; text-align: center; cursor: pointer; background: white; transition: all 0.2s ease;">
+                    <div style="font-size: 44px; margin-bottom: 12px;"><i data-lucide="folder-open" style="width:48px;height:48px;color:#6366F1;"></i></div>
+                    <div style="font-size: 16px; font-weight: 700; color: #1E1B4B;">Drop your hospital dataset here</div>
+                    <div style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 16px;">or click to browse files</div>
+                    <button id="browseBtn" class="btn-pill-primary" type="button">+ Upload Dataset</button>
+                    <input type="file" id="datasetFileInput" accept=".csv, .xlsx, .xls, .json" style="display: none;">
+                    <div style="font-size: 11px; color: #94A3B8; margin-top: 16px;">Supported formats: CSV, Excel (XLSX/XLS) — Automatic sheet detection & category normalization</div>
+                </div>
+
+                <!-- Progress Sequence Container -->
+                <div id="uploadStatusBox" style="display: none; margin-top: 24px; background: #F8FAFC; border-radius: 16px; padding: 20px; border: 1px solid #E2E8F0;">
+                    <h4 style="font-size: 14px; font-weight: 700; color: #312E81; margin-bottom: 12px;">Ingestion &amp; Schema Validation</h4>
+                    <ul id="progressList" style="list-style: none;"></ul>
+                </div>
+            </div>
+
+            <!-- Currently Active Dataset Section -->
+            <div class="content-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1E293B;">Active Hospital Dataset</h3>
+                    {% if active_dataset %}
+                        <button id="removeDatasetBtn" class="btn-pill-outline" style="color: #EF4444; border-color: #FCA5A5; font-size: 12.5px; padding: 6px 16px;">
+                            <i data-lucide="trash-2" style="width:14px;height:14px;"></i> Remove Dataset
+                        </button>
+                    {% endif %}
+                </div>
+
+                {% if active_dataset %}
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <!-- Dataset Info Table -->
+                        <div>
+                            <table class="table-custom">
+                                <tr><th>Dataset Name</th><td><strong>{{ active_dataset.filename }}</strong></td></tr>
+                                <tr><th>File Type</th><td><span class="badge-status badge-info">{{ active_dataset.file_type | upper }}</span></td></tr>
+                                <tr><th>Total Records</th><td><strong>{{ active_dataset.row_count }} rows</strong></td></tr>
+                                <tr><th>Upload Date</th><td>{{ active_dataset.upload_time.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+                                <tr><th>Status</th><td><span class="badge-status badge-success">● LIVE</span></td></tr>
+                            </table>
+                        </div>
+
+                        <!-- Detected Tables / Live Counts -->
+                        <div>
+                            <h4 style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 12px;">Category Records in Live Database</h4>
+                            <table class="table-custom">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Records in DB</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i data-lucide="users" style="width:14px;height:14px;"></i> Patients</td>
+                                        <td><strong>{{ table_counts.get('patients', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="calendar-days" style="width:14px;height:14px;"></i> Appointments</td>
+                                        <td><strong>{{ table_counts.get('appointments', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="bed" style="width:14px;height:14px;"></i> Beds</td>
+                                        <td><strong>{{ table_counts.get('beds', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="flask-conical" style="width:14px;height:14px;"></i> Labs</td>
+                                        <td><strong>{{ table_counts.get('labs', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="pill" style="width:14px;height:14px;"></i> Pharmacy</td>
+                                        <td><strong>{{ table_counts.get('pharmacy', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="stethoscope" style="width:14px;height:14px;"></i> Staffing</td>
+                                        <td><strong>{{ table_counts.get('staffing', 0) }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i data-lucide="clipboard-check" style="width:14px;height:14px;"></i> Discharge</td>
+                                        <td><strong>{{ table_counts.get('discharges', 0) }}</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div style="margin-top: 12px; font-size: 11px; color: #64748B;">
+                                <i data-lucide="check" style="width:12px;height:12px;"></i> All values calculated from live SQL database. User-created records are included.
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="padding: 32px; text-align: center; background: #F8FAFC; border-radius: 14px; border: 1px dashed #CBD5E1;">
+                        <div style="font-size: 32px; margin-bottom: 8px;"><i data-lucide="hospital" style="width:32px;height:32px;color:#6366F1;"></i></div>
+                        <div style="font-size: 15px; font-weight: 700; color: #1E293B;">No active hospital dataset</div>
+                        <div style="font-size: 13px; color: #64748B; margin-top: 4px;">Upload a hospital dataset above to activate CareSync AI workspace and agents.</div>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- REMOVE DATASET CONFIRMATION MODAL -->
+    <div id="removeDatasetModal" style="display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 20px; padding: 28px; max-width: 480px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <h3 style="font-size: 20px; font-weight: 800; color: #991B1B; margin-bottom: 12px;">Remove active dataset?</h3>
+            <p style="font-size: 13.5px; color: #475569; line-height: 1.6; margin-bottom: 24px;">
+                This will clear the current hospital data from the live workspace. Dashboard, agents, graphs and reports will become empty until a new dataset is uploaded.
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button id="cancelRemoveBtn" class="btn-pill-outline" type="button">Cancel</button>
+                <button id="confirmRemoveBtn" class="btn-pill-primary" style="background: #EF4444;" type="button">Remove Dataset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const removeBtn = document.getElementById('removeDatasetBtn');
+        const modal = document.getElementById('removeDatasetModal');
+        const cancelBtn = document.getElementById('cancelRemoveBtn');
+        const confirmBtn = document.getElementById('confirmRemoveBtn');
+
+        if (removeBtn && modal) {
+            removeBtn.addEventListener('click', () => {
+                modal.style.display = 'flex';
+            });
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+            confirmBtn.addEventListener('click', async () => {
+                confirmBtn.disabled = true;
+                confirmBtn.innerText = 'Removing...';
+                try {
+                    const res = await fetch('/api/dataset/remove', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (typeof showToast === 'function') showToast('Active dataset removed successfully!', 'success');
+                        setTimeout(() => window.location.reload(), 800);
+                    } else {
+                        alert(data.message || 'Error removing dataset');
+                        confirmBtn.disabled = false;
+                    }
+                } catch(err) {
+                    alert('Network error removing dataset.');
+                    confirmBtn.disabled = false;
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

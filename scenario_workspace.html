@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ scenario.name }} — CareSync AI Workspace</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">SCENARIOS</li>
+                <li><a href="/scenarios/create" class="sidebar-link"><i data-lucide="sparkles" style="width:18px;height:18px;"></i> Create Scenario</a></li>
+                <li><a href="/scenarios/{{ scenario.id }}" class="sidebar-link active"><i data-lucide="target" style="width:18px;height:18px;"></i> Active Scenario</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/coordinator" class="sidebar-link"><i data-lucide="brain" style="width:14px;height:14px;"></i> Coordinator</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/bed-management" class="sidebar-link"><i data-lucide="bed" style="width:14px;height:14px;"></i> Bed Management</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:14px;height:14px;"></i> Lab Diagnostics</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:14px;height:14px;"></i> Pharmacy</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:14px;height:14px;"></i> Staffing</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:14px;height:14px;"></i> Discharge</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="history" style="width:18px;height:18px;"></i> Scenario History</a></li>
+                
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">OPERATIONS</li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Scenario Workspace -->
+        <main class="main-content">
+            <div class="page-container">
+                {% if scenario.status == 'DATASET REMOVED' or not dataset %}
+                <div style="background: #FEF2F2; border: 1.5px solid #FCA5A5; color: #991B1B; padding: 16px 20px; border-radius: 16px; margin-bottom: 24px; font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 12px;">
+                    <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+                    <span>Historical scenario information is available, but live dataset analysis cannot be performed because the dataset is no longer active.</span>
+                </div>
+                {% endif %}
+
+                <!-- Scenario Header Card -->
+                <div class="data-source-banner" style="background: white; border: 1px solid #E2E8F0; padding: 24px; margin-bottom: 24px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                            <h2 style="font-size: 24px; font-weight: 800; color: #1E1B4B;">{{ scenario.name }}</h2>
+                            <span class="badge-status {% if scenario.status == 'COMPLETED' %}badge-success{% elif scenario.status == 'RUNNING' %}badge-warning{% elif scenario.status == 'DATASET REMOVED' %}badge-danger{% else %}badge-info{% endif %}">
+                                ● {{ scenario.status }}
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; color: #64748B; display: flex; gap: 20px; flex-wrap: wrap;">
+                            <span>📁 Dataset: <strong>{% if dataset %}{{ dataset.filename }}{% elif scenario.status == 'DATASET REMOVED' %}Dataset Removed{% else %}No Active Dataset{% endif %}</strong></span>
+                            <span>🗓️ Created: <strong>{{ scenario.created_at.strftime('%d %b %Y, %H:%M') }}</strong></span>
+                            <span>⚡ Priority: <strong>{{ scenario.priority }}</strong></span>
+                            <span>🏥 Department: <strong>{{ scenario.department }}</strong></span>
+                        </div>
+                    </div>
+                    <div>
+                        <button id="runScenarioBtn" class="btn-pill-primary" style="padding: 14px 28px; font-size: 15px;" {% if not dataset or scenario.status == 'DATASET REMOVED' %}disabled style="opacity: 0.5; cursor: not-allowed;" title="Active dataset required to run live scenario"{% endif %}>
+                            {% if not dataset or scenario.status == 'DATASET REMOVED' %}Dataset Required{% else %}⚡ Execute Dynamic Scenario Plan{% endif %}
+                        </button>
+                    </div>
+                </div>
+
+            {% if not dataset %}
+            <!-- EMPTY / REMOVED DATASET ALERT BANNER -->
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center shadow-sm mb-6">
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
+                    ⚠️
+                </div>
+                <h3 class="text-lg font-bold text-amber-900 mb-1">No Active Hospital Dataset</h3>
+                <p class="text-sm text-amber-700 max-w-lg mx-auto mb-4">Upload a dataset before creating or executing a live hospital scenario. All scenario-derived metrics require an active dataset.</p>
+                <a href="/data" class="inline-flex items-center gap-2 bg-amber-600 text-white font-semibold px-5 py-2.5 rounded-xl hover:bg-amber-700 transition text-sm">
+                    Upload Hospital Dataset →
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- SCENARIO SITUATION CARD -->
+            <div class="content-card" style="margin-bottom: 20px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #1E293B; margin-bottom: 8px;">SCENARIO SITUATION (SINGLE USER INPUT)</h3>
+                <div style="background: #F8FAFC; padding: 16px 20px; border-radius: 12px; border-left: 4px solid #6366F1; font-size: 14px; color: #334155; line-height: 1.5;">
+                    “ {{ scenario.user_instruction if scenario.user_instruction else (scenario.description if scenario.description else 'Hospital scenario instruction') }} ”
+                </div>
+            </div>
+
+            {% set command_center = summary.command_center if summary and summary.command_center else {} %}
+            {% set surge_metrics = summary.surge_metrics if summary and summary.surge_metrics else {} %}
+            {% set patient_count = command_center.incoming_patients if (command_center and command_center.incoming_patients is defined and command_center.incoming_patients) else (surge_metrics.incoming_patients if (surge_metrics and surge_metrics.incoming_patients is defined and surge_metrics.incoming_patients) else None) %}
+
+            <!-- CAN THE HOSPITAL HANDLE THE SURGE? (MOST IMPORTANT RESULT) -->
+            <div class="content-card" style="margin-bottom: 24px; background: white; border: 2px solid {% if command_center.surge_code == 'RED' or surge_metrics.surge_code == 'RED' %}#FCA5A5{% elif command_center.surge_code == 'GREEN' or surge_metrics.surge_code == 'GREEN' %}#86EFAC{% else %}#FCD34D{% endif %}; border-radius: 20px; padding: 24px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 12px;">
+                    <div>
+                        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #64748B;">SCENARIO SURGE VERDICT</div>
+                        <h2 style="font-size: 20px; font-weight: 900; color: #1E1B4B; margin-top: 4px;">
+                            {% if patient_count %}
+                                CAN THE HOSPITAL HANDLE THE {{ patient_count }}-PATIENT SURGE?
+                            {% else %}
+                                CAN THE HOSPITAL HANDLE THIS PATIENT SURGE?
+                            {% endif %}
+                        </h2>
+                    </div>
+                    <div>
+                        {% set v_text = command_center.surge_verdict if command_center.surge_verdict else (surge_metrics.surge_verdict if surge_metrics.surge_verdict else 'CAPACITY UNDER PRESSURE') %}
+                        <span style="font-size: 15px; font-weight: 800; padding: 8px 18px; border-radius: 50px; display: inline-flex; align-items: center; gap: 8px; {% if 'AVAILABLE' in v_text %}background: #DCFCE7; color: #166534; border: 1px solid #86EFAC;{% elif 'INSUFFICIENT' in v_text %}background: #FEE2E2; color: #991B1B; border: 1px solid #FCA5A5;{% else %}background: #FEF3C7; color: #92400E; border: 1px solid #FCD34D;{% endif %}">
+                            {% if 'AVAILABLE' in v_text %}<i data-lucide="check-circle-2" style="width:16px;height:16px;"></i>{% elif 'INSUFFICIENT' in v_text %}<i data-lucide="alert-circle" style="width:16px;height:16px;"></i>{% else %}<i data-lucide="alert-triangle" style="width:16px;height:16px;"></i>{% endif %} {{ v_text }}
+                        </span>
+                    </div>
+                </div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6; background: #F8FAFC; padding: 14px 18px; border-radius: 12px; margin-top: 8px;">
+                    {{ command_center.surge_msg if command_center.surge_msg else (surge_metrics.surge_msg if surge_metrics.surge_msg else 'Hospital capacity dynamically evaluated across beds, staffing, diagnostics, pharmacy, appointments, and discharge readiness.') }}
+                </p>
+            </div>
+
+            <!-- EMERGENCY SCENARIO COMMAND CENTER -->
+            <div class="content-card" style="margin-bottom: 24px; background: #FAF5FF; border: 1px solid #E9D5FF;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: #581C87; display: flex; align-items: center; gap: 8px;">
+                        <span><i data-lucide="siren" style="width:20px;height:20px;color:#7E22CE;"></i></span> EMERGENCY SCENARIO COMMAND CENTER
+                    </h3>
+                    <span style="font-size: 11px; font-weight: 700; color: #7E22CE; background: white; padding: 4px 12px; border-radius: 50px; border: 1px solid #E9D5FF;">FACTUAL DATABASE METRICS</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr) repeat(md, 4); gap: 12px; text-align: center;">
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #7E22CE; text-transform: uppercase;">Incoming Emergency Patients</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #6B21A8; margin-top: 2px;">{{ patient_count if patient_count is not none else 'Dynamic' }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #7E22CE; text-transform: uppercase;">Beds Required</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #6B21A8; margin-top: 2px;">{{ command_center.beds_required if (command_center and command_center.beds_required is defined and command_center.beds_required is not none) else (surge_metrics.beds_required if (surge_metrics and surge_metrics.beds_required is defined and surge_metrics.beds_required is not none) else (patient_count if patient_count is not none else 'Dynamic')) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #047857; text-transform: uppercase;">Beds Available</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #059669; margin-top: 2px;">{{ command_center.beds_available if command_center.beds_available is defined else (surge_metrics.available_beds if surge_metrics.available_beds is defined else kpis.available_beds) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #B91C1C; text-transform: uppercase;">Capacity Gap</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #DC2626; margin-top: 2px;">{{ command_center.capacity_gap if command_center.capacity_gap is defined else (surge_metrics.initial_capacity_gap if surge_metrics.initial_capacity_gap is defined else 0) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #1D4ED8; text-transform: uppercase;">Doctors Available</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #2563EB; margin-top: 2px;">{{ command_center.doctors_available if command_center.doctors_available is defined else (surge_metrics.available_doctors if surge_metrics.available_doctors is defined else 0) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #4338CA; text-transform: uppercase;">Clinical Staff Available</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #4F46E5; margin-top: 2px;">{{ command_center.clinical_staff_available if command_center.clinical_staff_available is defined else (surge_metrics.available_staff if surge_metrics.available_staff is defined else kpis.available_staff) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #B45309; text-transform: uppercase;">Pending Lab Tests</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #D97706; margin-top: 2px;">{{ command_center.pending_labs if command_center.pending_labs is defined else (surge_metrics.pending_labs if surge_metrics.pending_labs is defined else 0) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #BE123C; text-transform: uppercase;">Critical Medicines</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #E11D48; margin-top: 2px;">{{ command_center.critical_medicines if command_center.critical_medicines is defined else (surge_metrics.critical_meds if surge_metrics.critical_meds is defined else 0) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #6D28D9; text-transform: uppercase;">Today's Appointments</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #7C3AED; margin-top: 2px;">{{ command_center.today_appointments if command_center.today_appointments is defined else (surge_metrics.today_appts if surge_metrics.today_appts is defined else kpis.today_appointments) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF;">
+                        <div style="font-size: 10px; font-weight: 800; color: #047857; text-transform: uppercase;">Discharge Ready</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #059669; margin-top: 2px;">{{ command_center.discharge_ready if command_center.discharge_ready is defined else (surge_metrics.discharge_ready if surge_metrics.discharge_ready is defined else 0) }}</div>
+                    </div>
+                    <div style="background: white; padding: 14px; border-radius: 12px; border: 1px solid #F3E8FF; grid-column: span 2;">
+                        <div style="font-size: 10px; font-weight: 800; color: #047857; text-transform: uppercase;">Potential Beds Released</div>
+                        <div style="font-size: 22px; font-weight: 900; color: #059669; margin-top: 2px;">{{ command_center.potential_beds_released if command_center.potential_beds_released is defined else (surge_metrics.potential_beds_released if surge_metrics.potential_beds_released is defined else 0) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINAL AI OPERATIONAL SUMMARY -->
+            <div class="content-card" style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span><i data-lucide="bot" style="width:24px;height:24px;color:#4338CA;"></i></span>
+                        <h3 style="font-size: 16px; font-weight: 800; color: #312E81;">Gemini AI Operational Summary</h3>
+                    </div>
+                    <span style="font-size: 11px; font-weight: 700; color: #6366F1; background: white; padding: 4px 10px; border-radius: 50px;">DATABASE REASONING</span>
+                </div>
+                <p style="font-size: 14px; color: #334155; line-height: 1.6;">
+                    {% if summary and summary.final_summary %}{{ summary.final_summary }}{% elif summary and summary.analysis_summary %}{{ summary.analysis_summary }}{% else %}Coordinator Agent analyzed the uploaded hospital dataset and determined the dynamic execution plan.{% endif %}
+                </p>
+            </div>
+
+            <!-- Execution Plan Visual Timeline -->
+            <div class="content-card" style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">Dynamic Agent Execution Timeline</h3>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; position: relative; padding: 10px 0; overflow-x: auto;">
+                    <div style="position: absolute; top: 50%; left: 40px; right: 40px; height: 3px; background: #E2E8F0; z-index: 1;"></div>
+                    
+                    {% set all_step_names = ["Coordinator", "Bed Management", "Lab Diagnostics", "Pharmacy", "Staffing", "Appointment", "Discharge"] %}
+                    {% for step_name in all_step_names %}
+                        {% set slug = agent_slugs.get(step_name, 'coordinator') %}
+                        {% set run_rec = runs_by_agent.get(step_name) %}
+                        {% if not run_rec and step_name == 'Lab Diagnostics' %}{% set run_rec = runs_by_agent.get('Lab') %}{% endif %}
+                        <a href="/scenarios/{{ scenario.id }}/agents/{{ slug }}" style="text-decoration: none; z-index: 2; text-align: center; min-width: 90px;">
+                            <div style="width: 44px; height: 44px; border-radius: 50%; background: {% if run_rec and run_rec.status == 'Completed' %}#10B981{% elif scenario.status == 'COMPLETED' %}#10B981{% elif run_rec and run_rec.status == 'Running' %}#818CF8{% else %}white{% endif %}; border: 3px solid #6366F1; display: flex; align-items: center; justify-content: center; color: {% if (run_rec and run_rec.status == 'Completed') or scenario.status == 'COMPLETED' %}white{% else %}#6366F1{% endif %}; font-size: 16px; font-weight: 800; margin: 0 auto; box-shadow: var(--shadow-sm);">
+                                {{ loop.index }}
+                            </div>
+                            <div style="font-size: 11px; font-weight: 700; color: #1E293B; margin-top: 6px;">{{ step_name }}</div>
+                            <div style="font-size: 10px; font-weight: 600; color: {% if (run_rec and run_rec.status == 'Completed') or scenario.status == 'COMPLETED' %}#059669{% else %}#64748B{% endif %};">
+                                {% if (run_rec and run_rec.status == 'Completed') or scenario.status == 'COMPLETED' %}Completed{% elif run_rec %}{{ run_rec.status }}{% else %}Waiting{% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Agent Workspaces Grid -->
+            <div class="section-header">
+                <div class="section-title">Specialized Scenario Agents</div>
+                <span style="font-size: 12px; color: #64748B;">Click any agent card to open its scenario workspace</span>
+            </div>
+
+            <div class="agent-grid" style="margin-bottom: 24px;">
+                {% for agent_name in execution_plan %}
+                    {% set slug = agent_slugs.get(agent_name, 'coordinator') %}
+                    {% set run_rec = runs_by_agent.get(agent_name) %}
+                    <div class="agent-card {% if run_rec and run_rec.status == 'Completed' %}completed{% elif run_rec and run_rec.status == 'Running' %}running{% endif %}" style="display: block; padding: 18px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="agent-icon">
+                                    {% if agent_name == 'Bed Management' %}<i data-lucide="bed" style="width:20px;height:20px;"></i>
+                                    {% elif agent_name == 'Appointment' %}<i data-lucide="calendar-days" style="width:20px;height:20px;"></i>
+                                    {% elif agent_name == 'Lab' or agent_name == 'Lab Diagnostics' %}<i data-lucide="flask-conical" style="width:20px;height:20px;"></i>
+                                    {% elif agent_name == 'Pharmacy' %}<i data-lucide="pill" style="width:20px;height:20px;"></i>
+                                    {% elif agent_name == 'Staffing' %}<i data-lucide="stethoscope" style="width:20px;height:20px;"></i>
+                                    {% elif agent_name == 'Discharge' %}<i data-lucide="clipboard-check" style="width:20px;height:20px;"></i>
+                                    {% else %}<i data-lucide="brain" style="width:20px;height:20px;"></i>{% endif %}
+                                </div>
+                                <div class="agent-name">{{ agent_name }}</div>
+                            </div>
+                            <span class="badge-status {% if run_rec and run_rec.status == 'Completed' %}badge-success{% else %}badge-info{% endif %}">
+                                {{ run_rec.status if run_rec else 'Waiting' }}
+                            </span>
+                        </div>
+
+                        <div style="font-size: 12px; color: #64748B; margin-bottom: 14px;">
+                            {% if run_rec and run_rec.status == 'Completed' %}
+                                ✓ {{ run_rec.actions_taken }} action(s) executed over {{ run_rec.records_analyzed }} record(s).
+                            {% else %}
+                                Waiting for scenario execution or manual trigger.
+                            {% endif %}
+                        </div>
+
+                        <a href="/scenarios/{{ scenario.id }}/agents/{{ slug }}" class="btn-pill-outline" style="display: block; text-align: center; font-size: 12px; padding: 8px;">
+                            Open Agent Workspace →
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- LIVE HOSPITAL SITUATION SCENARIO SUMMARY -->
+            <div class="content-card" style="margin-bottom: 24px;">
+                <h3 style="font-size: 16px; font-weight: 800; color: #1E293B; margin-bottom: 14px;">LIVE HOSPITAL SITUATION</h3>
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; text-align: center;">
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">BEDS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #10B981; margin-top: 2px;">{{ kpis.available_beds }} Free</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">STAFF</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #6366F1; margin-top: 2px;">{{ kpis.available_staff if kpis.available_staff is defined else 300 }} Avail</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">DOCTORS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #3B82F6; margin-top: 2px;">Avail</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">LABS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #F59E0B; margin-top: 2px;">Pending</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">PHARMACY</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #EF4444; margin-top: 2px;">Critical</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">APPOINTMENTS</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #818CF8; margin-top: 2px;">{{ kpis.today_appointments }} Today</div>
+                    </div>
+                    <div style="padding: 12px; background: #F8FAFC; border-radius: 10px;">
+                        <div style="font-size: 10px; font-weight: 800; color: #64748B;">DISCHARGE</div>
+                        <div style="font-size: 18px; font-weight: 800; color: #059669; margin-top: 2px;">Ready</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario Analytics & Graphs -->
+            <div class="dashboard-columns">
+                <div class="content-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">Live Scenario Overview Analytics</h3>
+                    <div id="scenarioOverviewChart" style="height: 280px;"></div>
+                </div>
+
+                <div class="content-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">Recent Scenario Activity Log</h3>
+                    {% if activities and activities|length > 0 %}
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                            {% for act in activities %}
+                            <li style="display: flex; gap: 10px; font-size: 12.5px;">
+                                <span style="color: #818CF8; font-weight: 700; min-width: 60px;">{{ act.timestamp }}</span>
+                                <div>
+                                    <div style="font-weight: 600; color: #334155;">{{ act.agent_name }}</div>
+                                    <div style="color: #64748B; font-size: 11.5px;">{{ act.action }}</div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div style="padding: 24px; text-align: center; color: #94A3B8; font-size: 13px;">
+                            No scenario activities logged yet.
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const runBtn = document.getElementById('runScenarioBtn');
+            if (runBtn) {
+                runBtn.addEventListener('click', async () => {
+                    runBtn.disabled = true;
+                    runBtn.innerText = '⚡ Running Dynamic Scenario...';
+                    
+                    try {
+                        const res = await fetch('/api/scenarios/{{ scenario.id }}/run', { method: 'POST' });
+                        const data = await res.json();
+                        if (data.success) {
+                            showToast("Scenario completed successfully!", "success");
+                            setTimeout(() => window.location.reload(), 1200);
+                        } else {
+                            showToast(data.message || "Scenario execution failed.", "error");
+                            runBtn.disabled = false;
+                        }
+                    } catch (err) {
+                        showToast("Error running scenario.", "error");
+                        runBtn.disabled = false;
+                    }
+                });
+            }
+
+            if (typeof Plotly !== 'undefined') {
+                Plotly.newPlot('scenarioOverviewChart', [{
+                    x: ['Total Patients', 'Emergency', 'Free Beds', 'Appointments', 'Pending Labs'],
+                    y: [{{ kpis.total_patients }}, {{ kpis.emergency_patients }}, {{ kpis.available_beds }}, {{ kpis.today_appointments }}, 3],
+                    type: 'bar',
+                    marker: { color: ['#6366F1', '#EF4444', '#10B981', '#3B82F6', '#F59E0B'] }
+                }], { margin: { t: 10, b: 30 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' });
+            }
+        });
+    </script>
+</body>
+</html>

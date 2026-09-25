@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSync AI — Smarter Hospitals, Brighter Lives</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 2rem;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F8FAFC;
+        }
+        section[id] {
+            scroll-margin-top: 2.5rem;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="bg-[#F4F6F9] text-slate-900 antialiased min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white m-0 p-0 overflow-x-hidden">
+
+    <!-- FULL SCREEN HERO SECTION (100% EDGE TO EDGE, 100vh MIN HEIGHT, NO WHITE WASH) -->
+    <section class="relative w-full min-h-screen flex flex-col justify-between overflow-hidden bg-slate-950">
+        
+        <!-- FULL BLEED 3D HOSPITAL BACKGROUND PICTURE (100% FULL SCREEN) -->
+        <img src="/static/images/hero_hospital.jpg" alt="CareSync AI Fairview General Hospital 3D Scene" class="absolute inset-0 w-full h-full object-cover object-center scale-100 transition-transform duration-1000">
+
+        <!-- CRISP VIBRANT OVERLAY FOR CRISP READABILITY WITHOUT WHITE WASH -->
+        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/45 via-60% to-slate-950/10"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-slate-950/40"></div>
+
+        <!-- INVISIBLE TOOLBAR / NAVBAR BLENDED DIRECTLY INTO THE PICTURE -->
+        <header class="relative z-50 w-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 pt-8 pb-4 flex items-center justify-between gap-6">
+            
+            <!-- LEFT: Brand Logo & Subtitle -->
+            <a href="/" class="flex items-center gap-3 group shrink-0">
+                <div class="w-10 h-10 bg-[#5B42F3] rounded-full flex items-center justify-center text-white shadow-lg shadow-indigo-600/40 group-hover:scale-105 transition duration-200">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        <path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/>
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-black text-white text-lg leading-tight tracking-tight drop-shadow-md">CareSync AI</div>
+                    <div class="text-[10px] font-extrabold text-indigo-200 tracking-wider uppercase drop-shadow-sm">Smarter Hospitals</div>
+                </div>
+            </a>
+
+            <!-- CENTER: Invisible Toolbar Navigation Links -->
+            <nav class="hidden lg:flex items-center gap-8 text-sm font-bold text-white drop-shadow-md">
+                <a href="/" class="text-white hover:text-indigo-300 transition font-extrabold underline underline-offset-8 decoration-2 decoration-[#5B42F3]">Home</a>
+                <a href="#agents" class="text-white/90 hover:text-white transition hover:drop-shadow">Agents</a>
+                <a href="#features" class="text-white/90 hover:text-white transition hover:drop-shadow">Features</a>
+                <a href="#how-it-works" class="text-white/90 hover:text-white transition hover:drop-shadow">How It Works</a>
+                <a href="#about" class="text-white/90 hover:text-white transition hover:drop-shadow">About</a>
+                <a href="#contact" class="text-white/90 hover:text-white transition hover:drop-shadow">Contact</a>
+            </nav>
+
+            <!-- RIGHT: Sign In & Sign Up -->
+            <div class="flex items-center gap-4 shrink-0">
+                <a href="/signin" class="px-5 py-2.5 text-xs font-extrabold text-white hover:text-indigo-200 bg-white/10 hover:bg-white/20 rounded-full transition backdrop-blur-md border border-white/30 shadow-md">Sign In</a>
+                <a href="/signup" class="px-6 py-2.5 text-xs font-extrabold text-white bg-[#5B42F3] hover:bg-[#4C35E0] rounded-full shadow-lg shadow-indigo-600/50 transition transform active:scale-95">
+                    Sign Up
+                </a>
+            </div>
+        </header>
+
+        <!-- HERO CONTENT BLENDED ON TOP OF THE FULL SCREEN PICTURE -->
+        <div class="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 lg:px-16 py-auto my-auto w-full flex flex-col justify-center space-y-7 text-white">
+            <!-- Top Badge Pill -->
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/20 text-indigo-300 text-[11px] font-extrabold uppercase tracking-widest shadow-xl max-w-max">
+                ✨ AI FOR HEALTHIER TOMORROWS
+            </div>
+
+            <!-- Main Headline -->
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black text-white leading-[1.05] tracking-tight drop-shadow-2xl">
+                Smarter<br>
+                Hospitals,<br>
+                <span class="text-indigo-300">Brighter Lives</span>
+            </h1>
+
+            <!-- Subtitle Paragraph -->
+            <p class="text-slate-100 text-base sm:text-xl leading-relaxed font-medium drop-shadow-md max-w-xl">
+                CareSync AI empowers hospitals with real-time insights across beds, staff, diagnostics, pharmacy and patient care.
+            </p>
+
+            <!-- Hero Action Buttons -->
+            <div class="flex flex-wrap items-center gap-4 pt-4">
+                <a href="/signup" class="px-9 py-4 bg-[#5B42F3] hover:bg-[#4C35E0] text-white font-extrabold rounded-full shadow-xl shadow-indigo-900/50 transition transform hover:-translate-y-0.5 active:translate-y-0 text-base flex items-center gap-2">
+                    Get Started →
+                </a>
+                <a href="#agents" class="px-8 py-4 bg-slate-900/60 hover:bg-slate-900/80 text-white font-bold rounded-full border border-white/30 shadow-xl backdrop-blur-md transition text-base">
+                    Explore CareSync AI
+                </a>
+            </div>
+        </div>
+
+        <!-- SCROLL DOWN INDICATOR -->
+        <a href="#agents" class="relative z-20 pb-8 flex flex-col items-center justify-center gap-1 text-white/70 hover:text-white transition group cursor-pointer">
+            <span class="text-[11px] font-extrabold uppercase tracking-widest text-slate-300 group-hover:text-white">Scroll Down</span>
+            <svg class="w-6 h-6 animate-bounce text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </a>
+    </section>
+
+    <!-- MAIN CONTAINER WITH MATCHING MARGINS & ALIGNMENT FOR SECTIONS BELOW HERO -->
+    <div class="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+        <!-- SPECIALIZED AGENTS SECTION (#agents) -->
+        <section id="agents" class="space-y-8 pt-6">
+            <div class="text-center max-w-3xl mx-auto space-y-2">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-50 text-purple-700 font-extrabold text-xs tracking-wider uppercase border border-purple-100">
+                    🤖 Autonomous AI Workforce
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Specialized CareSync AI Agents</h2>
+                <p class="text-slate-500 text-sm sm:text-base">Seven domain-specific AI agents querying live hospital data to solve hospital surge scenarios</p>
+            </div>
+
+            <!-- 7 Agents Grid (3 Cols Desktop, Equal Height & Pure 3D Illustrations) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Agent 1: Coordinator Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-purple-100 shadow-xs hover:shadow-md hover:border-purple-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xl border border-purple-100">🧠</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Coordinator Agent</h3>
+                                    <span class="text-[11px] font-bold text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100">AI Command Center</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Orchestrates emergency situation analysis, extracts incoming patient surge demand, and triggers specialized agent workflows.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_1_coordinator_3d.png" alt="Coordinator Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 2: Bed Management Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-indigo-100 shadow-xs hover:shadow-md hover:border-indigo-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl border border-indigo-100">🛏️</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Bed Management Agent</h3>
+                                    <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-100">Ward Capacity</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Analyzes bed occupancy across ICU, Emergency, and General wards to identify available beds and reserve surge capacity.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_2_bed_management_3d.png" alt="Bed Management Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 3: Staffing Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-teal-100 shadow-xs hover:shadow-md hover:border-teal-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold text-xl border border-teal-100">🩺</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Staffing Agent</h3>
+                                    <span class="text-[11px] font-bold text-teal-600 bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-100">Clinical Support</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Evaluates real-time availability of doctors, nurses, and lab technicians to deploy clinical staff during emergency surges.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_5_staffing_3d.png" alt="Staffing Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 4: Lab Diagnostics Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-rose-100 shadow-xs hover:shadow-md hover:border-rose-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-xl border border-rose-100">🧪</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Lab Diagnostics Agent</h3>
+                                    <span class="text-[11px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-100">Stat Diagnostics</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Monitors pending diagnostic test workload, pinpoints overloaded laboratories, and escalates emergency lab test priority.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_3_lab_diagnostics_3d.png" alt="Lab Diagnostics Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 5: Pharmacy Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-amber-100 shadow-xs hover:shadow-md hover:border-amber-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xl border border-amber-100">💊</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Pharmacy Agent</h3>
+                                    <span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-100">Medicine Stock</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Tracks medicine inventory levels, calculates stock shortages, and flags critical emergency drugs requiring instant restock.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_4_pharmacy_3d.png" alt="Pharmacy Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 6: Appointment Agent -->
+                <div class="bg-white rounded-3xl p-6 border border-blue-100 shadow-xs hover:shadow-md hover:border-blue-300 transition space-y-4 flex flex-col justify-between group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl border border-blue-100">📅</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Appointment Agent</h3>
+                                    <span class="text-[11px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">Scheduling &amp; SMS</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Detects clinic schedule conflicts, identifies routine appointments for rescheduling, and triggers Twilio SMS patient notices.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_6_appointment_3d.png" alt="Appointment Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+                <!-- Agent 7: Discharge Agent (Standard Small Box Centered in Middle Column) -->
+                <div class="bg-white rounded-3xl p-6 border border-emerald-100 shadow-xs hover:shadow-md hover:border-emerald-300 transition space-y-4 flex flex-col justify-between group lg:col-start-2">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl border border-emerald-100">📋</div>
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 text-lg">Discharge Release Agent</h3>
+                                    <span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">Capacity Release</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed font-medium">Groups discharge-ready patients by department to rapidly release bed capacity during major emergency surge events.</p>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden h-52 border border-slate-100 shadow-2xs relative mt-4">
+                        <img src="/static/images/agent_7_discharge_3d.png" alt="Discharge Release Agent Illustration" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CORE PLATFORM FEATURES SECTION (#features) -->
+        <section id="features" class="space-y-8 pt-6">
+            <div class="text-center max-w-3xl mx-auto space-y-2">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-xs tracking-wider uppercase border border-indigo-100">
+                    ⚡ Core Platform Features
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Built for Production Hospital Scale</h2>
+                <p class="text-slate-500 text-sm sm:text-base">Complete operational intelligence powered by SQLite live databases and Gemini AI reasoning</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs space-y-3 hover:border-indigo-200 transition">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl border border-indigo-100">📁</div>
+                    <h3 class="text-base font-extrabold text-slate-900">Hospital Dataset Ingestion</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Seamlessly upload Excel, CSV, or JSON hospital datasets with automatic table mapping across patients, beds, appointments, labs, pharmacy, staffing, and discharges.</p>
+                </div>
+
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs space-y-3 hover:border-purple-200 transition">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xl border border-purple-100">📊</div>
+                    <h3 class="text-base font-extrabold text-slate-900">Live 2D Operational Analytics</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Interactive 2D Plotly graphs visualizing bed occupancy by ward, staff availability by role, lab test workload, and medicine inventory status.</p>
+                </div>
+
+                <div class="bg-white p-7 rounded-3xl border border-slate-200/80 shadow-xs space-y-3 hover:border-emerald-200 transition">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xl border border-emerald-100">💬</div>
+                    <h3 class="text-base font-extrabold text-slate-900">Twilio SMS Patient Dispatch</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed">Automated patient notification system dispatching appointment confirmations and emergency reschedule alerts directly to mobile phones.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS SECTION (#how-it-works) -->
+        <section id="how-it-works" class="bg-white rounded-3xl p-8 sm:p-12 border border-indigo-100/80 shadow-xs space-y-10">
+            <div class="text-center max-w-3xl mx-auto space-y-2">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-50 text-purple-700 font-extrabold text-xs tracking-wider uppercase border border-purple-100">
+                    🔄 Autonomous Workflow Architecture
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">How CareSync AI Works</h2>
+                <p class="text-slate-500 text-sm sm:text-base">End-to-end emergency intelligence workflow execution</p>
+            </div>
+
+            <!-- Workflow Steps Horizontal Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 relative">
+                
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center mx-auto">1</div>
+                    <h4 class="font-extrabold text-slate-900 text-xs">Hospital Data</h4>
+                    <p class="text-[11px] text-slate-500">Live SQLite DB tables &amp; CSV datasets</p>
+                </div>
+
+                <div class="bg-purple-50/60 p-5 rounded-2xl border border-purple-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-purple-600 text-white font-black text-xs flex items-center justify-center mx-auto">2</div>
+                    <h4 class="font-extrabold text-purple-950 text-xs">Coordinator Agent</h4>
+                    <p class="text-[11px] text-purple-700">Surge extraction &amp; workflow triggering</p>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center mx-auto">3</div>
+                    <h4 class="font-extrabold text-slate-900 text-xs">Specialized Agents</h4>
+                    <p class="text-[11px] text-slate-500">Beds, Staff, Lab, Pharmacy, SMS</p>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center mx-auto">4</div>
+                    <h4 class="font-extrabold text-slate-900 text-xs">Real-Time Analysis</h4>
+                    <p class="text-[11px] text-slate-500">Bottleneck detection &amp; calculation</p>
+                </div>
+
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 text-white font-black text-xs flex items-center justify-center mx-auto">5</div>
+                    <h4 class="font-extrabold text-slate-900 text-xs">AI Recommendation</h4>
+                    <p class="text-[11px] text-slate-500">Gemini LLM operational plan</p>
+                </div>
+
+                <div class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-100 text-center space-y-2 relative">
+                    <div class="w-8 h-8 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center mx-auto">6</div>
+                    <h4 class="font-extrabold text-emerald-950 text-xs">Hospital Action</h4>
+                    <p class="text-[11px] text-emerald-700">Bed reservation &amp; staff deployment</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TRUST / ABOUT SECTION (#about) -->
+        <section id="about" class="bg-gradient-to-r from-purple-50/80 via-indigo-50/60 to-purple-50/80 rounded-3xl p-8 sm:p-12 border border-purple-100 shadow-xs">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+                
+                <!-- Left Image Card -->
+                <div class="lg:col-span-5">
+                    <div class="rounded-3xl overflow-hidden shadow-md border border-white/80 h-80 sm:h-96">
+                        <img src="/static/images/doctor_patient.jpg" alt="CareSync AI Care Scene" class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                <!-- Right Text Content -->
+                <div class="lg:col-span-7 space-y-5">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-600 bg-white/90 px-3.5 py-1 rounded-full border border-indigo-100 inline-block shadow-2xs">About CareSync AI</span>
+                    <h2 class="text-3xl sm:text-4xl font-black text-indigo-950 tracking-tight">“ Technology that cares. ”</h2>
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
+                        CareSync AI is an intelligent healthcare operations platform built to solve hospital bottlenecks during mass casualty events, emergency surges, and routine care. By connecting live hospital datasets with autonomous AI agents, we help clinical teams make faster decisions while keeping patient care at the heart of every action.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <div class="inline-flex items-center gap-2 bg-white/90 px-4 py-2.5 rounded-xl text-xs font-extrabold text-slate-800 border border-purple-100 shadow-2xs">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                            Faster emergency decisions
+                        </div>
+                        <div class="inline-flex items-center gap-2 bg-white/90 px-4 py-2.5 rounded-xl text-xs font-extrabold text-slate-800 border border-purple-100 shadow-2xs">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                            Optimal bed &amp; staff utilization
+                        </div>
+                        <div class="inline-flex items-center gap-2 bg-white/90 px-4 py-2.5 rounded-xl text-xs font-extrabold text-slate-800 border border-purple-100 shadow-2xs">
+                            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i>
+                            Compassionate patient care
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CONTACT US SECTION (#contact) -->
+        <section id="contact" class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-xs space-y-8">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-xs tracking-wider uppercase border border-indigo-100">
+                    📞 Get In Touch
+                </div>
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Contact CareSync AI Team</h2>
+                <p class="text-slate-500 text-xs sm:text-sm">Have questions about deploying CareSync AI in your hospital network? We're here to help.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Contact Details -->
+                <div class="lg:col-span-5 space-y-6 bg-slate-50/70 p-6 rounded-2xl border border-slate-100">
+                    <h3 class="font-extrabold text-slate-900 text-base">Hospital Operations Headquarters</h3>
+                    
+                    <div class="space-y-4 text-xs font-medium text-slate-700">
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="map-pin" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-slate-900 font-bold">Address</strong>
+                                CareSync AI Health Technology Center<br>
+                                100 Medical Center Parkway, Suite 500
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="mail" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-slate-900 font-bold">Email Inquiries</strong>
+                                support@caresync.ai
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="phone" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <strong class="block text-slate-900 font-bold">Emergency Support Hotline</strong>
+                                +1 (800) 555-CARE (2273)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-900 text-xs flex items-center gap-3">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                        <span class="font-bold">Hospital Emergency Support Active 24/7</span>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div class="lg:col-span-7 space-y-4">
+                    <form onsubmit="event.preventDefault(); alert('Thank you for reaching out to CareSync AI. Our team will contact you shortly.');" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Your Name</label>
+                                <input type="text" placeholder="Dr. Alex Rivera" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Hospital / Organization</label>
+                                <input type="text" placeholder="Fairview General Hospital" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition">
+                            </div>
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Work Email</label>
+                            <input type="email" placeholder="arivera@fairviewhealth.org" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Message / Inquiry</label>
+                            <textarea rows="4" placeholder="How can CareSync AI assist your hospital operational team?" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-indigo-600 focus:bg-white transition"></textarea>
+                        </div>
+
+                        <button type="submit" class="px-7 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md text-xs transition">
+                            Send Message →
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- CALL TO ACTION SECTION (#cta) -->
+        <section id="cta" class="bg-indigo-600 rounded-3xl p-8 sm:p-14 text-center text-white shadow-xl space-y-6">
+            <h2 class="text-3xl sm:text-4xl font-black tracking-tight">Make Your Hospital Smarter Today</h2>
+            <p class="text-indigo-100 text-sm sm:text-base max-w-2xl mx-auto font-medium">
+                Coordinate beds, staff, diagnostics, pharmacy and patient release operations with autonomous AI multi-agent intelligence.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                <a href="/signup" class="px-8 py-3.5 bg-white text-indigo-600 hover:bg-indigo-50 font-extrabold rounded-full shadow-lg text-sm transition">
+                    Get Started Now →
+                </a>
+                <a href="#agents" class="px-7 py-3.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold rounded-full border border-indigo-500 shadow-xs text-sm transition">
+                    Explore Agents
+                </a>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="border-t border-slate-200/80 pt-8 pb-10 text-center space-y-4">
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-7 h-7 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-xs font-bold shadow-xs">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg>
+                </div>
+                <span class="font-extrabold text-slate-900 text-base">CareSync AI</span>
+                <span class="text-xs text-indigo-600 font-bold">• Smarter Hospitals</span>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-bold text-slate-500">
+                <a href="/" class="hover:text-indigo-600 transition">Home</a>
+                <a href="#agents" class="hover:text-indigo-600 transition">Agents</a>
+                <a href="#features" class="hover:text-indigo-600 transition">Features</a>
+                <a href="#how-it-works" class="hover:text-indigo-600 transition">How It Works</a>
+                <a href="#about" class="hover:text-indigo-600 transition">About</a>
+                <a href="#contact" class="hover:text-indigo-600 transition">Contact</a>
+            </div>
+
+            <p class="text-xs text-slate-400">© 2026 CareSync AI. All rights reserved. Autonomous Multi-Agent Hospital Operational Intelligence.</p>
+        </footer>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Smooth Scrolling for all Navigation Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const targetId = this.getAttribute('href');
+                if (!targetId || targetId === '#') return;
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

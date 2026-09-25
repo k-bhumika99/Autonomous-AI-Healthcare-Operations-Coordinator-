@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ agent_name }} Agent Workspace — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">SCENARIOS</li>
+                <li><a href="/scenarios/create" class="sidebar-link"><i data-lucide="sparkles" style="width:18px;height:18px;"></i> Create Scenario</a></li>
+                <li><a href="/scenarios/{{ scenario.id }}" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Active Scenario</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/coordinator" class="sidebar-link {% if agent_slug == 'coordinator' %}active{% endif %}"><i data-lucide="brain" style="width:14px;height:14px;"></i> Coordinator</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/bed-management" class="sidebar-link {% if agent_slug == 'bed-management' or agent_slug == 'bed' %}active{% endif %}"><i data-lucide="bed" style="width:14px;height:14px;"></i> Bed Management</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/labs" class="sidebar-link {% if agent_slug == 'labs' or agent_slug == 'lab' %}active{% endif %}"><i data-lucide="flask-conical" style="width:14px;height:14px;"></i> Lab Diagnostics</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/pharmacy" class="sidebar-link {% if agent_slug == 'pharmacy' %}active{% endif %}"><i data-lucide="pill" style="width:14px;height:14px;"></i> Pharmacy</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/staffing" class="sidebar-link {% if agent_slug == 'staffing' %}active{% endif %}"><i data-lucide="stethoscope" style="width:14px;height:14px;"></i> Staffing</a></li>
+                <li style="padding-left: 24px; font-size: 12px;"><a href="/scenarios/{{ scenario.id }}/agents/discharge" class="sidebar-link {% if agent_slug == 'discharge' %}active{% endif %}"><i data-lucide="clipboard-check" style="width:14px;height:14px;"></i> Discharge</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="history" style="width:18px;height:18px;"></i> Scenario History</a></li>
+                
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">OPERATIONS</li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-container space-y-6">
+
+                <!-- 1. AGENT WORKSPACE HEADER -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-purple-100 rounded-xl text-purple-600">
+                            {% if agent_slug == 'bed-management' or agent_slug == 'bed' %}
+                            <i data-lucide="bed" class="w-7 h-7"></i>
+                            {% elif agent_slug == 'appointments' or agent_slug == 'appointment' %}
+                            <i data-lucide="calendar-days" class="w-7 h-7"></i>
+                            {% elif agent_slug == 'labs' or agent_slug == 'lab' %}
+                            <i data-lucide="flask-conical" class="w-7 h-7"></i>
+                            {% elif agent_slug == 'pharmacy' %}
+                            <i data-lucide="pill" class="w-7 h-7"></i>
+                            {% elif agent_slug == 'staffing' %}
+                            <i data-lucide="stethoscope" class="w-7 h-7"></i>
+                            {% elif agent_slug == 'discharge' %}
+                            <i data-lucide="clipboard-check" class="w-7 h-7"></i>
+                            {% else %}
+                            <i data-lucide="brain" class="w-7 h-7"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-semibold uppercase tracking-wider text-purple-600 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-100">Specialized Agent</span>
+                                <a href="/scenarios/{{ scenario.id }}" class="text-xs text-slate-500 hover:text-slate-700 underline">← Back to Scenario</a>
+                            </div>
+                            <h1 class="text-2xl font-bold text-slate-800 mt-0.5">{{ agent_name }} Agent Workspace</h1>
+                            <p class="text-sm text-slate-500">Operational context: <span class="font-medium text-slate-700">{{ scenario.name }}</span></p>
+                        </div>
+                    </div>
+
+                    <!-- EXECUTION STATUS -->
+                    <div class="flex items-center gap-3">
+                        <span id="agent-status-badge" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold {% if run_rec and run_rec.status == 'Completed' %}bg-emerald-100 text-emerald-700 border border-emerald-200{% elif run_rec and run_rec.status == 'Running' %}bg-amber-100 text-amber-700 border border-amber-200 animate-pulse{% else %}bg-slate-100 text-slate-600 border border-slate-200{% endif %}">
+                            <span class="w-2 h-2 rounded-full {% if run_rec and run_rec.status == 'Completed' %}bg-emerald-500{% elif run_rec and run_rec.status == 'Running' %}bg-amber-500{% else %}bg-slate-400{% endif %}"></span>
+                            <span id="agent-status-text">{% if run_rec %}{{ run_rec.status }}{% else %}Ready{% endif %}</span>
+                        </span>
+                    </div>
+                </div>
+
+                {% if not has_active_dataset %}
+                <!-- EMPTY / REMOVED DATASET ALERT BANNER -->
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center shadow-sm">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                        ⚠️
+                    </div>
+                    <h3 class="text-base font-bold text-amber-900 mb-1">NO ACTIVE DATASET</h3>
+                    <p class="text-xs text-amber-700 max-w-lg mx-auto mb-3">This agent requires an active hospital dataset. Upload a dataset to run live analysis.</p>
+                    <a href="/data" class="inline-flex items-center gap-2 bg-amber-600 text-white font-semibold px-4 py-2 rounded-xl hover:bg-amber-700 transition text-xs">
+                        Upload Hospital Dataset →
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- 2. COORDINATOR DIRECTIVE -->
+                <div class="bg-purple-50/70 border border-purple-100 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center gap-2 mb-2 text-purple-800 font-semibold text-sm">
+                        <i data-lucide="brain" class="w-4 h-4 text-purple-600"></i>
+                        Coordinator Directive for {{ agent_name }} Agent
+                    </div>
+                    <p class="text-sm text-purple-950 italic">
+                        "{% if coordinator_instruction %}{{ coordinator_instruction }}{% else %}{{ scenario.user_instruction }}{% endif %}"
+                    </p>
+                </div>
+
+                <!-- AUTOMATIC AGENT INSTRUCTION & RUN TRIGGER -->
+                <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800">Automatic Agent Execution Context</h3>
+                        <p class="text-xs text-slate-500">Instruction source: <span class="font-semibold text-purple-700">Scenario Situation &amp; Coordinator Directive</span></p>
+                    </div>
+                    <button id="run-agent-btn" onclick="executeSingleAgent()" {% if not has_active_dataset %}disabled title="Upload a dataset to run this agent"{% endif %} class="inline-flex items-center gap-2 bg-indigo-600 text-white font-semibold px-5 py-2 rounded-xl hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition text-xs">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        {% if not has_active_dataset %}Dataset Required{% else %}Re-run {{ agent_name }} Analysis{% endif %}
+                    </button>
+                </div>
+
+                <!-- RESULTS SECTION CONTAINER -->
+                <div id="results-container" class="space-y-6 {% if not run_rec or not run_rec.results_json %}hidden{% endif %}">
+                    {% set results = run_rec.results_json | from_json if run_rec and run_rec.results_json else {} %}
+
+                    <!-- 3. KEY OPERATIONAL FINDINGS -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-start gap-2">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-purple-600"></i>
+                            <h3 class="text-lg font-bold text-slate-800">Key Operational Findings</h3>
+                        </div>
+
+                        <!-- METRIC CARDS GRID -->
+                        <div id="metric-cards-grid" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- STRUCTURED NUMBERED FINDINGS SECTIONS -->
+                    <div id="structured-sections-container" class="space-y-4">
+                        <!-- Numbered findings injected here -->
+                    </div>
+
+                    <!-- 4. ACTUAL LIVE DATABASE RECORDS TABLE -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Actual Live Database Records</h3>
+                                <p class="text-xs text-slate-500">Directly queried from SQLite live hospital database</p>
+                            </div>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="w-full text-left text-xs text-slate-600 border-collapse">
+                                <thead id="records-table-head" class="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase tracking-wider">
+                                    <!-- Table headers -->
+                                </thead>
+                                <tbody id="records-table-body" class="divide-y divide-slate-100 font-mono">
+                                    <!-- Table rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 5. 2D OPERATIONAL ANALYTICS -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 id="chart-2d-title" class="text-base font-bold text-slate-800">Operational Analytics</h3>
+                                <p class="text-xs text-slate-500">Live Database Metrics 2D Bar Chart</p>
+                            </div>
+                            <span class="text-xs bg-purple-50 text-purple-700 font-medium px-2.5 py-1 rounded-full border border-purple-100">2D Bar Graph</span>
+                        </div>
+                        <div id="plotly-2d-chart" class="w-full h-80 rounded-xl border border-slate-100 bg-slate-50/50"></div>
+                    </div>
+
+                    <!-- 6. AI OPERATIONAL RECOMMENDATION -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+                        <div class="flex items-center gap-2 text-purple-700 font-bold text-sm">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-purple-600"></i>
+                            AI Operational Recommendation (Gemini Reasoning)
+                        </div>
+                        <div id="ai-narrative-text" class="text-sm text-slate-700 leading-relaxed bg-purple-50/40 p-4 rounded-xl border border-purple-100/60 font-sans">
+                            {% if results and results.ai_narrative %}{{ results.ai_narrative }}{% else %}No recommendation generated yet.{% endif %}
+                        </div>
+                    </div>
+
+                    <!-- DATABASE ACTION STATUS -->
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Database Action Status</span>
+                            <p id="action-details-text" class="text-sm text-slate-800 font-medium mt-0.5">
+                                {% if results and results.db_action_details %}{{ results.db_action_details }}{% else %}No database records were changed.{% endif %}
+                            </p>
+                        </div>
+                        <span id="action-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {% if results and results.db_action_tag == 'DATABASE UPDATED' %}bg-blue-100 text-blue-700 border border-blue-200{% else %}bg-slate-200 text-slate-700{% endif %}">
+                            {% if results and results.db_action_tag %}{{ results.db_action_tag }}{% else %}ANALYSIS ONLY{% endif %}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+<script id="initial-results-data" type="application/json">
+{% if run_rec and run_rec.results_json %}{{ run_rec.results_json | safe }}{% else %}null{% endif %}
+</script>
+<script id="user-instruction-data" type="text/plain">{% if coordinator_instruction %}{{ coordinator_instruction }}{% else %}{{ scenario.user_instruction }}{% endif %}</script>
+
+<script>
+var agentSlug = "{{ agent_slug }}";
+var scenarioId = "{{ scenario.id }}";
+var hasActiveDataset = "{{ 'true' if has_active_dataset else 'false' }}" === "true";
+
+var initialResultsEl = document.getElementById("initial-results-data");
+var initialResults = null;
+try {
+    initialResults = initialResultsEl ? JSON.parse(initialResultsEl.textContent) : null;
+} catch (e) {
+    console.error("Failed to parse initial results:", e);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (initialResults && hasActiveDataset) {
+        renderAgentWorkspaceResults(initialResults);
+    } else if (!hasActiveDataset) {
+        renderEmptyDatasetState();
+    }
+});
+
+function renderEmptyDatasetState() {
+    document.getElementById("results-container").classList.remove("hidden");
+    
+    // Key findings empty
+    renderMetricCards({});
+    
+    // Structured sections empty
+    var structContainer = document.getElementById("structured-sections-container");
+    structContainer.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-2">
+            <h4 class="text-xs font-extrabold tracking-wider text-slate-500 uppercase">NO ACTIVE DATASET</h4>
+            <div class="text-xs text-slate-600">This agent requires an active hospital dataset. Upload a dataset to run live analysis.</div>
+        </div>
+    `;
+    
+    // DB records compact empty card (100-160px height)
+    var head = document.getElementById("records-table-head");
+    var body = document.getElementById("records-table-body");
+    head.innerHTML = '';
+    body.innerHTML = `
+        <tr>
+            <td colspan="100%" class="p-6 text-center bg-amber-50/60 rounded-xl border border-amber-200/80">
+                <div class="font-extrabold text-amber-900 text-sm mb-1">NO ACTIVE DATASET</div>
+                <div class="text-xs text-amber-700">No live hospital records are available. Upload a hospital dataset to perform live analysis.</div>
+            </td>
+        </tr>
+    `;
+    
+    // 2D Chart empty
+    var chartContainer = document.getElementById("plotly-2d-chart");
+    chartContainer.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400 font-semibold text-sm">NO DATA</div>';
+    
+    // Narrative empty
+    document.getElementById("ai-narrative-text").innerText = "Dataset unavailable. Upload a hospital dataset to generate AI operational recommendations.";
+    document.getElementById("action-details-text").innerText = "No database active.";
+}
+
+function executeSingleAgent() {
+    if (!hasActiveDataset) return;
+
+    var btn = document.getElementById("run-agent-btn");
+    var statusBadge = document.getElementById("agent-status-badge");
+    var statusText = document.getElementById("agent-status-text");
+    var userInstructionEl = document.getElementById("user-instruction-data");
+    var userInstruction = userInstructionEl ? userInstructionEl.textContent.trim() : "";
+
+    btn.disabled = true;
+    btn.innerHTML = 'Running Agent...';
+
+    statusBadge.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200 animate-pulse";
+    statusText.innerText = "Running";
+
+    fetch('/api/scenarios/' + scenarioId + '/agents/' + agentSlug + '/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instruction: userInstruction })
+    })
+    .then(response => response.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = 'Re-run ' + agentSlug + ' Analysis';
+
+        if (data.success && data.results) {
+            statusBadge.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200";
+            statusText.innerText = "Completed";
+            renderAgentWorkspaceResults(data.results);
+        } else {
+            statusBadge.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200";
+            statusText.innerText = "Failed";
+            alert("Execution error: " + (data.message || "Unknown error"));
+        }
+    })
+    .catch(err => {
+        btn.disabled = false;
+        btn.innerHTML = 'Re-run Analysis';
+        statusBadge.className = "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 border border-rose-200";
+        statusText.innerText = "Error";
+        console.error(err);
+    });
+}
+
+function renderAgentWorkspaceResults(res) {
+    document.getElementById("results-container").classList.remove("hidden");
+
+    if (res.structured_sections) {
+        renderStructuredSections(res.structured_sections);
+    }
+    renderMetricCards(res.key_findings || {});
+    renderRecordsTable(res.operational_records || []);
+
+    if (res.chart2d_data) {
+        renderClean2DBarChart("plotly-2d-chart", res.chart2d_data);
+    }
+
+    if (res.ai_narrative) {
+        document.getElementById("ai-narrative-text").innerText = res.ai_narrative;
+    }
+
+    if (res.db_action_details) {
+        document.getElementById("action-details-text").innerText = res.db_action_details;
+    }
+    var actionBadge = document.getElementById("action-badge");
+    if (res.db_action_tag) {
+        actionBadge.innerText = res.db_action_tag;
+        actionBadge.className = res.db_action_tag === 'DATABASE UPDATED' ? 
+            "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-200" : 
+            "inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-slate-200 text-slate-700";
+    }
+}
+
+function renderStructuredSections(sections) {
+    var container = document.getElementById("structured-sections-container");
+    if (!container) return;
+    if (!sections || sections.length === 0) {
+        container.innerHTML = '<div class="text-slate-400 italic bg-white p-4 rounded-xl border border-slate-200">No findings generated.</div>';
+        return;
+    }
+
+    container.innerHTML = sections.map(sec => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+            <h4 class="text-xs font-extrabold tracking-wider text-purple-900 uppercase bg-purple-50 px-3 py-1.5 rounded-lg inline-block border border-purple-100">
+                ${sec.title}
+            </h4>
+            <div class="space-y-2 font-mono text-sm text-slate-800">
+                ${sec.items.map(item => `<div class="pl-2 border-l-2 border-purple-400 py-0.5">${item}</div>`).join('')}
+            </div>
+        </div>
+    `).join('');
+}
+
+function renderMetricCards(findings) {
+    var grid = document.getElementById("metric-cards-grid");
+    grid.innerHTML = "";
+
+    var cards = [];
+    if (agentSlug === 'coordinator') {
+        cards = [
+            { label: 'INCOMING PATIENTS', val: (findings.incoming_patients !== undefined && findings.incoming_patients !== null && findings.incoming_patients !== 0) ? findings.incoming_patients : 'Dynamic', color: 'text-rose-600' },
+            { label: 'BEDS REQUIRED', val: (findings.beds_required !== undefined && findings.beds_required !== null && findings.beds_required !== 0) ? findings.beds_required : 'Dynamic', color: 'text-amber-600' },
+            { label: 'AVAILABLE BEDS', val: findings.available_beds !== undefined ? findings.available_beds : (findings.available || 0), color: 'text-emerald-600' },
+            { label: 'CAPACITY GAP', val: findings.capacity_gap !== undefined ? findings.capacity_gap : 0, color: 'text-purple-600' },
+            { label: 'SURGE VERDICT', val: findings.surge_verdict || 'ANALYZED', color: 'text-indigo-600' }
+        ];
+    } else if (agentSlug === 'bed-management' || agentSlug === 'bed') {
+        cards = [
+            { label: 'TOTAL BEDS', val: findings.total_beds || 0, color: 'text-slate-800' },
+            { label: 'OCCUPIED', val: findings.occupied || 0, color: 'text-amber-600' },
+            { label: 'AVAILABLE', val: findings.available || 0, color: 'text-emerald-600' },
+            { label: 'OCCUPANCY %', val: (findings.occupancy_pct || 0) + '%', color: 'text-purple-600' },
+            { label: 'POTENTIAL RELEASE', val: findings.potential_release || 0, color: 'text-teal-600' }
+        ];
+    } else if (agentSlug === 'appointments' || agentSlug === 'appointment') {
+        cards = [
+            { label: 'TOTAL TODAY', val: findings.total_today || 0, color: 'text-slate-800' },
+            { label: 'EMERGENCY', val: findings.emergency || 0, color: 'text-rose-600' },
+            { label: 'URGENT', val: findings.urgent || 0, color: 'text-amber-600' },
+            { label: 'ROUTINE', val: findings.routine || 0, color: 'text-blue-600' },
+            { label: 'CONFLICTS', val: findings.conflicts || 0, color: 'text-purple-600' }
+        ];
+    } else if (agentSlug === 'labs' || agentSlug === 'lab') {
+        cards = [
+            { label: 'TOTAL TESTS', val: findings.total_tests || 0, color: 'text-slate-800' },
+            { label: 'PENDING', val: findings.pending || 0, color: 'text-amber-600' },
+            { label: 'EMERGENCY', val: findings.emergency || 0, color: 'text-rose-600' },
+            { label: 'URGENT', val: findings.urgent || 0, color: 'text-purple-600' },
+            { label: 'HIGHEST LAB', val: findings.highest_workload_lab || 'None', color: 'text-teal-600' }
+        ];
+    } else if (agentSlug === 'pharmacy') {
+        cards = [
+            { label: 'TOTAL MEDICINES', val: findings.total_medicines || 0, color: 'text-slate-800' },
+            { label: 'CRITICAL', val: findings.critical || 0, color: 'text-rose-600' },
+            { label: 'LOW STOCK', val: findings.low_stock || 0, color: 'text-amber-600' },
+            { label: 'AVAILABLE', val: findings.available || 0, color: 'text-emerald-600' },
+            { label: 'TOP SHORTAGE', val: findings.top_shortage || 'None', color: 'text-purple-600' }
+        ];
+    } else if (agentSlug === 'staffing') {
+        var totalStaffVal = findings.total_staff !== undefined ? findings.total_staff : (findings.total_clinical_staff !== undefined ? findings.total_clinical_staff : 0);
+        var availableStaffVal = findings.available !== undefined ? findings.available : (findings.available_staff !== undefined ? findings.available_staff : 0);
+        var busyStaffVal = findings.busy !== undefined ? findings.busy : Math.max(0, totalStaffVal - availableStaffVal);
+        cards = [
+            { label: 'TOTAL STAFF', val: totalStaffVal, color: 'text-slate-800' },
+            { label: 'AVAILABLE', val: availableStaffVal, color: 'text-emerald-600' },
+            { label: 'BUSY', val: busyStaffVal, color: 'text-amber-600' },
+            { label: 'DOCTORS AVAIL', val: findings.doctors_available || 0, color: 'text-purple-600' },
+            { label: 'NURSES AVAIL', val: findings.nurses_available || 0, color: 'text-teal-600' }
+        ];
+    } else if (agentSlug === 'discharge') {
+        cards = [
+            { label: 'TOTAL RECORDS', val: findings.total_records || 0, color: 'text-slate-800' },
+            { label: 'READY', val: findings.ready || 0, color: 'text-emerald-600' },
+            { label: 'NOT READY', val: findings.not_ready || 0, color: 'text-slate-500' },
+            { label: 'POTENTIAL BEDS', val: findings.potential_beds || 0, color: 'text-purple-600' }
+        ];
+    } else {
+        cards = [
+            { label: 'TOTAL METRICS', val: Object.keys(findings).length, color: 'text-slate-800' }
+        ];
+    }
+
+
+    grid.innerHTML = cards.map(c => 
+        '<div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm text-center">' +
+            '<div class="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1">' + c.label + '</div>' +
+            '<div class="text-xl font-extrabold ' + c.color + '">' + c.val + '</div>' +
+        '</div>'
+    ).join('');
+}
+
+function renderRecordsTable(records) {
+    var head = document.getElementById("records-table-head");
+    var body = document.getElementById("records-table-body");
+
+    if (!records || records.length === 0) {
+        head.innerHTML = '';
+        body.innerHTML = `
+            <tr>
+                <td colspan="100%" class="p-6 text-center bg-amber-50/60 rounded-xl border border-amber-200/80">
+                    <div class="font-extrabold text-amber-900 text-sm mb-1">NO ACTIVE DATASET</div>
+                    <div class="text-xs text-amber-700">No live hospital records are available. Upload a hospital dataset to perform live analysis.</div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    var cols = Object.keys(records[0]);
+    head.innerHTML = '<tr>' + cols.map(c => '<th class="p-3">' + c.replace('_', ' ') + '</th>').join('') + '</tr>';
+
+    var displayRecs = records.slice(0, 15);
+    body.innerHTML = displayRecs.map(r => 
+        '<tr class="hover:bg-slate-50/80">' +
+            cols.map(c => '<td class="p-3 text-slate-700">' + (r[c] !== null ? r[c] : '-') + '</td>').join('') +
+        '</tr>'
+    ).join('');
+}
+
+function renderClean2DBarChart(containerId, chartData) {
+    var container = document.getElementById(containerId);
+    if (!container || !chartData || !chartData.categories || !chartData.values || chartData.categories.length === 0) {
+        if (container) {
+            container.innerHTML = '<div class="flex items-center justify-center h-full text-slate-400 font-semibold text-sm">NO DATA</div>';
+        }
+        return;
+    }
+
+    var trace = {
+        x: chartData.categories,
+        y: chartData.values,
+        type: 'bar',
+        marker: {
+            color: '#6366F1',
+            line: { color: '#4F46E5', width: 1 }
+        },
+        text: chartData.values.map(v => v.toString()),
+        textposition: 'auto'
+    };
+
+    var layout = {
+        title: { text: chartData.title || 'Operational Analytics', font: { family: 'Plus Jakarta Sans, sans-serif', size: 14, color: '#1e293b' } },
+        paper_bgcolor: 'rgba(255,255,255,0)',
+        plot_bgcolor: 'rgba(255,255,255,0)',
+        margin: { l: 40, r: 20, b: 40, t: 40 },
+        xaxis: { title: chartData.x_axis || 'Category', gridcolor: '#f1f5f9' },
+        yaxis: { title: chartData.y_axis || 'Value', gridcolor: '#e2e8f0' }
+    };
+
+    Plotly.newPlot(containerId, [trace], layout, { responsive: true, displayModeBar: false });
+}
+</script>
+</body>
+</html>

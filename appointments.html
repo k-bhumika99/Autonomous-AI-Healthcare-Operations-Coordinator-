@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/static/js/main.js" defer></script>
+    <style>
+        /* Hospital Appointment Workflow Custom Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 24px;
+            width: 960px;
+            max-width: 95vw;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #E2E8F0;
+        }
+        .modal-header {
+            padding: 24px 32px;
+            border-bottom: 1px solid #F1F5F9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #F8FAFC 0%, #EEF2FF 100%);
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+        }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #94A3B8;
+            line-height: 1;
+            padding: 4px;
+            transition: color 0.15s ease;
+        }
+        .modal-close-btn:hover {
+            color: #1E293B;
+        }
+        .modal-body {
+            padding: 28px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+        .appointment-two-column-layout {
+            display: grid;
+            grid-template-columns: 1fr 260px;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 860px) {
+            .appointment-two-column-layout {
+                grid-template-columns: 1fr;
+            }
+            .qr-right-col {
+                order: 2;
+                margin-top: 16px;
+            }
+        }
+        .qr-right-col {
+            position: sticky;
+            top: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .qr-card-clean {
+            background: #FFFFFF;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px -2px rgba(99, 102, 241, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 260px;
+            height: 260px;
+        }
+        .qr-code-img {
+            width: 220px;
+            height: 220px;
+            object-fit: contain;
+            border-radius: 12px;
+            display: block;
+        }
+        .form-section-title {
+            font-size: 13px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6366F1;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #E2E8F0;
+        }
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 640px) {
+            .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        .diag-pill-checkbox {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: #F8FAFC;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .diag-pill-checkbox:hover {
+            border-color: #A5B4FC;
+            background: #EEF2FF;
+        }
+        .diag-pill-checkbox input[type="checkbox"] {
+            accent-color: #6366F1;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        .diag-pill-checkbox.active {
+            background: #EEF2FF;
+            border-color: #6366F1;
+            color: #4338CA;
+        }
+        .suggested-box {
+            background: #F0FDF4;
+            border: 1.5px dashed #86EFAC;
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-top: 10px;
+        }
+        .suggested-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #DCFCE7;
+            color: #166534;
+            border: 1px solid #BBF7D0;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .suggested-pill:hover {
+            background: #166534;
+            color: white;
+        }
+        .doctor-card {
+            border: 1.5px solid #E2E8F0;
+            border-radius: 16px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .doctor-card:hover {
+            border-color: #818CF8;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12);
+        }
+        .doctor-card.selected {
+            border-color: #6366F1;
+            background: #EEF2FF;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25);
+        }
+        .slot-btn {
+            padding: 10px 14px;
+            border: 1.5px solid #E2E8F0;
+            border-radius: 12px;
+            background: #FFFFFF;
+            color: #1E293B;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .slot-btn:hover:not(:disabled) {
+            border-color: #6366F1;
+            color: #4338CA;
+            background: #EEF2FF;
+        }
+        .slot-btn.selected {
+            background: #6366F1;
+            color: #FFFFFF;
+            border-color: #4F46E5;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+        }
+        .slot-btn:disabled {
+            background: #F1F5F9;
+            color: #94A3B8;
+            border-color: #E2E8F0;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+        .summary-card {
+            background: linear-gradient(135deg, #FAF5FF 0%, #EEF2FF 100%);
+            border: 1.5px solid #C7D2FE;
+            border-radius: 20px;
+            padding: 24px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #E2E8F0;
+            font-size: 14px;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: #64748B;
+            font-weight: 600;
+        }
+        .summary-value {
+            color: #1E1B4B;
+            font-weight: 700;
+            text-align: right;
+        }
+        .ai-suggested-tag {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 8px;
+            background: #FEE2E2;
+            color: #991B1B;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+        /* Twilio status badge styles */
+        .twilio-status-indicator {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .twilio-status-indicator.mock {
+            color: #F59E0B;
+        }
+        .twilio-status-indicator.live {
+            color: #10B981;
+        }
+        .twilio-badge-pill {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-block;
+        }
+        .twilio-modal-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-block;
+        }
+        .twilio-badge-pill.mock,
+        .twilio-modal-pill.mock {
+            background: #FEF3C7;
+            color: #92400E;
+            border: 1px solid #FDE68A;
+        }
+        .twilio-badge-pill.live,
+        .twilio-modal-pill.live {
+            background: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link active"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Scenarios</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <div style="margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h2 style="font-size: 24px; font-weight: 800; color: #1E1B4B;">Appointments &amp; Notifications</h2>
+                        <p style="font-size: 14px; color: #64748B;">
+                            Realistic Hospital Appointment Booking Workflow &bull; Twilio WhatsApp Integration
+                            &nbsp;|&nbsp; <span class="twilio-status-indicator {% if twilio_status.mock %}mock{% else %}live{% endif %}">{{ twilio_status.label }}</span>
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <a href="/data" class="btn-pill-outline">Manage Dataset</a>
+                        <button id="openNewApptBtn" class="btn-pill-primary" onclick="openAppointmentModal()">+ Add New Appointment</button>
+                    </div>
+                </div>
+
+                <!-- Twilio Account & QR Scanner Banner -->
+                <div class="content-card" style="margin-bottom: 24px; padding: 20px; background: linear-gradient(135deg, #EEF2FF 0%, #FAF5FF 100%); border: 1.5px solid #C7D2FE; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                        <div style="background: white; padding: 8px; border-radius: 16px; border: 2px solid #6366F1; box-shadow: 0 4px 12px rgba(99,102,241,0.15); display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                            <img src="/static/images/twilio_qr.png" alt="Twilio QR Code Scanner" style="width: 110px; height: 110px; object-fit: contain; border-radius: 8px;">
+                            <span style="font-size: 10px; font-weight: 800; color: #4338CA; letter-spacing: 0.5px;">📱 SCAN FOR WHATSAPP</span>
+                        </div>
+                        <div>
+                            <div style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: white; border-radius: 20px; font-size: 11px; font-weight: 800; color: #4338CA; border: 1px solid #C7D2FE;">
+                                <i data-lucide="message-square" style="width: 14px; height: 14px;"></i> Twilio WhatsApp Confirmation Engine Active
+                            </div>
+                            <h3 style="font-size: 18px; font-weight: 800; color: #1E1B4B; margin-top: 6px; margin-bottom: 4px;">Automated WhatsApp Confirmation Dispatch</h3>
+                            <p style="font-size: 13px; color: #475569; max-width: 540px; margin: 0; font-weight: 500;">
+                                Scan QR code on your mobile device to receive automated WhatsApp booking confirmations with Appointment ID, Doctor, Department, and diagnostic instructions.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        <span class="twilio-badge-pill {% if twilio_status.mock %}mock{% else %}live{% endif %}">
+                            ● {{ twilio_status.label }}
+                        </span>
+                        <span style="font-size: 11px; color: #64748B; font-weight: 600;">Twilio WhatsApp Service</span>
+                    </div>
+                </div>
+
+                <!-- Appointment Status Chart -->
+                {% if appointments and appointments|length > 0 %}
+                <div class="content-card" style="margin-bottom: 24px;">
+                    <div style="font-size: 14px; font-weight: 700; color: #1E293B; margin-bottom: 12px;">Appointment Status Distribution (Live DB)</div>
+                    <div id="apptStatusChart" style="height: 200px;"></div>
+                </div>
+                {% endif %}
+
+                <!-- Appointments List Table -->
+                <div class="content-card">
+                    <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div style="font-size: 14px; font-weight: 700; color: #1E293B;">
+                            Total: <strong id="apptTotalCount">{{ appointments|length if appointments else 0 }}</strong> appointments in hospital database
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table class="table-custom table-appointments">
+                            <colgroup>
+                                <col class="col-appt-id">
+                                <col class="col-patient">
+                                <col class="col-doctor">
+                                <col class="col-dept">
+                                <col class="col-date">
+                                <col class="col-slot">
+                                <col class="col-priority">
+                                <col class="col-status">
+                                <col class="col-source">
+                                <col class="col-notification">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>Appt ID</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
+                                    <th>Department</th>
+                                    <th>Date</th>
+                                    <th>Time Slot</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Source</th>
+                                    <th>Notification</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentsTableBody">
+                                {% if appointments and appointments|length > 0 %}
+                                    {% for a in appointments %}
+                                    <tr id="appt-row-{{ a.appointment_id }}">
+                                        <td><strong>{{ a.appointment_id }}</strong></td>
+                                        <td>{{ a.patient_name }}</td>
+                                        <td>{{ a.doctor }}</td>
+                                        <td>{{ a.department }}</td>
+                                        <td>{{ a.date }}</td>
+                                        <td>
+                                            {% if a.status == 'Rescheduled' and a.rescheduled_time %}
+                                                <span style="text-decoration: line-through; color: #94A3B8; font-size: 11px;">{{ a.original_time }}</span>
+                                                <span style="color: #6366F1; font-weight: 700;">{{ a.rescheduled_time }}</span>
+                                            {% else %}
+                                                {{ a.time }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge-status {% if a.priority in ['Emergency', 'Critical', 'Urgent'] %}badge-danger{% else %}badge-info{% endif %}">
+                                                {{ a.priority }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge-status
+                                                {% if a.status == 'Rescheduled' %}badge-warning
+                                                {% elif a.status == 'Completed' %}badge-success
+                                                {% elif a.status == 'Cancelled' %}badge-danger
+                                                {% elif a.status == 'Confirmed' %}badge-success
+                                                {% else %}badge-info{% endif %}">
+                                                {{ a.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if a.source in ['USER BOOKED', 'user_created'] %}
+                                                <span class="badge-status badge-success" style="font-size: 11px;">User Booked</span>
+                                            {% elif a.source == 'agent' %}
+                                                <span class="badge-status badge-warning" style="font-size: 11px;">Agent</span>
+                                            {% else %}
+                                                <span class="badge-status badge-info" style="font-size: 11px;">Dataset</span>
+                                            {% endif %}
+                                        </td>
+                                        <td id="notif-{{ a.appointment_id }}">
+                                            {% set notif = notif_map.get(a.appointment_id) %}
+                                            {% if notif %}
+                                                <span class="badge-status
+                                                    {% if notif.status == 'Sent' %}badge-success
+                                                    {% elif notif.status == 'Failed' %}badge-danger
+                                                    {% elif notif.status == 'Pending' %}badge-warning
+                                                    {% else %}badge-info{% endif %}">
+                                                    WhatsApp {{ notif.status }}
+                                                </span>
+                                            {% elif a.source in ['USER BOOKED', 'user_created'] %}
+                                                <span class="badge-status badge-success">WhatsApp Sent</span>
+                                            {% else %}
+                                                <span class="badge-status badge-info" style="color: #64748B;">Not Required</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr id="emptyApptRow">
+                                        <td colspan="10" style="text-align: center; padding: 40px;">
+                                            <div class="empty-state-box" style="box-shadow: none;">
+                                                <div class="empty-state-icon"><i data-lucide="calendar-days" style="width:32px;height:32px;"></i></div>
+                                                <h3 style="font-size: 16px; font-weight: 700; color: #1E293B;">No appointment data available</h3>
+                                                <p style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 16px;">Click "+ Add New Appointment" to schedule an appointment.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- REALISTIC HOSPITAL APPOINTMENT BOOKING MODAL              -->
+    <!-- ========================================================= -->
+    <div id="newApptModal" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <h3 style="font-size: 20px; font-weight: 800; color: #1E1B4B; display: flex; align-items: center; gap: 10px;">
+                        <i data-lucide="hospital" style="width:24px;height:24px;color:#6366F1;"></i> Hospital Appointment Booking Workflow
+                    </h3>
+                    <p style="font-size: 13px; color: #64748B; margin: 2px 0 0 0;">Intelligent Department &amp; Doctor Recommendation with WhatsApp Confirmation</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                        <span id="modalTwilioBadge" class="twilio-modal-pill {% if twilio_status.mock %}mock{% else %}live{% endif %}">
+                            ● {{ twilio_status.label }}
+                        </span>
+                        <span style="font-size: 10px; color: #64748B; font-weight: 600;">Twilio WhatsApp Service</span>
+                    </div>
+                    <button type="button" onclick="closeAppointmentModal()" class="modal-close-btn" aria-label="Close modal">✕</button>
+                </div>
+            </div>
+
+            <div class="modal-body">
+                <!-- Alert Banner -->
+                <div id="modalAlert" style="display: none; padding: 14px 18px; border-radius: 14px; font-size: 13px; font-weight: 600;"></div>
+
+                <!-- ========================================= -->
+                <!-- FORM VIEW (Step 1 to 4)                    -->
+                <!-- ========================================= -->
+                <div id="bookingFormContainer">
+                    <div class="appointment-two-column-layout">
+                        <!-- LEFT SIDE: Form Fields -->
+                        <div class="form-left-col">
+                            <form id="newApptForm" onsubmit="event.preventDefault(); proceedToSummary();">
+                                
+                                <!-- 1. PATIENT INFORMATION -->
+                                <div class="form-section-title">
+                                    <i data-lucide="user" style="width:16px;height:16px;"></i> 1. Patient Information
+                                </div>
+                                <div class="form-grid-2" style="margin-bottom: 20px;">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">Patient Full Name <span style="color:#EF4444;">*</span></label>
+                                        <input type="text" id="apptPatientName" class="form-input" placeholder="e.g. Rahul Mehta" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Phone Number (WhatsApp / SMS) <span style="color:#EF4444;">*</span></label>
+                                        <input type="tel" id="apptPhone" class="form-input" placeholder="+91 98765 43210" oninput="checkPhoneSandboxStatus(this.value)" required>
+                                        <div id="phoneSandboxStatusBox" style="display: none; border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 11px; font-weight: 600;"></div>
+                                        <div style="background: #F0FDFA; border: 1.5px solid #99F6E4; border-radius: 8px; padding: 8px 12px; margin-top: 6px; color: #0D9488; font-size: 11px; font-weight: 600;">
+                                            📱 <strong>WhatsApp Auto-Detect Active</strong><br>
+                                            Scanning the QR code auto-fills your phone number &amp; triggers automated WhatsApp confirmation.
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Age <span style="color:#EF4444;">*</span></label>
+                                        <input type="number" id="apptAge" class="form-input" placeholder="e.g. 42" min="1" max="120" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Gender <span style="color:#EF4444;">*</span></label>
+                                        <select id="apptGender" class="form-input" required>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Disease / Medical Condition <span style="color:#EF4444;">*</span></label>
+                                        <select id="apptDisease" class="form-input" required onchange="handleDiseaseChange()">
+                                            <option value="">Select Medical Condition...</option>
+                                            <option value="Cardiac problem">Cardiac problem</option>
+                                            <option value="Chest pain">Chest pain</option>
+                                            <option value="Hypertension">Hypertension</option>
+                                            <option value="Diabetes">Diabetes</option>
+                                            <option value="Kidney disease">Kidney disease</option>
+                                            <option value="Nephrology-related condition">Nephrology-related condition</option>
+                                            <option value="Neurological problem">Neurological problem</option>
+                                            <option value="Orthopedic problem">Orthopedic problem</option>
+                                            <option value="Gastrointestinal problem">Gastrointestinal problem</option>
+                                            <option value="Respiratory problem">Respiratory problem</option>
+                                            <option value="Fever / infection">Fever / infection</option>
+                                            <option value="General medicine">General medicine</option>
+                                            <option value="Cancer / oncology">Cancer / oncology</option>
+                                            <option value="Emergency condition">Emergency condition</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 2. SYMPTOM / CONDITION DETAILS -->
+                                <div class="form-section-title">
+                                    <i data-lucide="activity" style="width:16px;height:16px;"></i> 2. Symptoms &amp; Severity
+                                </div>
+                                <div class="form-grid-2" style="margin-bottom: 20px;">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">Symptoms / Reason for Visit</label>
+                                        <textarea id="apptSymptoms" class="form-input" rows="2" placeholder="e.g. Swelling in legs and reduced urine output for the last 2 days." style="resize: vertical;"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Severity Level</label>
+                                        <select id="apptSeverity" class="form-input">
+                                            <option value="Routine" selected>Routine (Normal Checkup)</option>
+                                            <option value="Urgent">Urgent (Requires Prompt Care)</option>
+                                            <option value="Emergency">Emergency (Immediate Attention)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Appointment Type <span style="color:#EF4444;">*</span></label>
+                                        <select id="apptType" class="form-input" required>
+                                            <option value="Specialist Consultation" selected>Specialist Consultation</option>
+                                            <option value="New Consultation">New Consultation</option>
+                                            <option value="Follow-up">Follow-up</option>
+                                            <option value="Diagnostic Consultation">Diagnostic Consultation</option>
+                                            <option value="Emergency Consultation">Emergency Consultation</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 3. DIAGNOSTIC REQUIREMENTS -->
+                                <div class="form-section-title">
+                                    <i data-lucide="flask-conical" style="width:16px;height:16px;"></i> 3. Diagnostic / Scan Requirements
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label class="form-label" style="margin-bottom: 8px; display: block;">Select Diagnostic Tests:</label>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;" id="diagnosticsList">
+                                        {% for diag in ['Blood Test', 'CBC', 'Blood Glucose', 'Kidney Function Test', 'Liver Function Test', 'ECG', 'X-Ray', 'CT Scan', 'MRI', 'Ultrasound', 'Echocardiogram', 'Creatinine', 'Urinalysis', 'Other'] %}
+                                        <label class="diag-pill-checkbox" id="lbl-diag-{{ loop.index }}">
+                                            <input type="checkbox" name="diagnostics" value="{{ diag }}" onchange="toggleDiagActive(this)">
+                                            <span>{{ diag }}</span>
+                                        </label>
+                                        {% endfor %}
+                                    </div>
+
+                                    <!-- Suggested Diagnostics Container -->
+                                    <div id="suggestedBox" class="suggested-box" style="display: none;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <span style="font-size: 12px; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px;">
+                                                <i data-lucide="sparkles" style="width:14px;height:14px;"></i> Suggested Diagnostics based on Medical Condition
+                                            </span>
+                                            <span id="aiTagDiag" class="ai-suggested-tag" style="display:none;">AI Suggested</span>
+                                        </div>
+                                        <div id="suggestedPillsContainer" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                                        <p style="font-size: 11px; color: #15803D; margin-top: 8px; margin-bottom: 0; font-style: italic;">
+                                            ℹ️ Note: These suggestions are clinical decision support only and do not replace formal diagnosis.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- 4. DEPARTMENT SELECTION -->
+                                <div class="form-section-title">
+                                    <i data-lucide="building-2" style="width:16px;height:16px;"></i> 4. Department &amp; Doctor Assignment
+                                </div>
+                                <div class="form-grid-2" style="margin-bottom: 20px;">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">
+                                            Recommended Department
+                                            <span id="deptAiTag" class="ai-suggested-tag" style="display:none; margin-left: 8px;">AI Suggested</span>
+                                        </label>
+                                        <select id="apptDepartment" class="form-input" required onchange="handleDepartmentChange()">
+                                            <option value="">Select Department...</option>
+                                            <option value="Cardiology">Cardiology</option>
+                                            <option value="Nephrology">Nephrology</option>
+                                            <option value="Neurology">Neurology</option>
+                                            <option value="Orthopedics">Orthopedics</option>
+                                            <option value="Gastroenterology">Gastroenterology</option>
+                                            <option value="Pulmonology">Pulmonology (Respiratory)</option>
+                                            <option value="General Medicine">General Medicine</option>
+                                            <option value="Oncology">Oncology</option>
+                                            <option value="Emergency Department">Emergency Department</option>
+                                            <option value="Endocrinology">Endocrinology</option>
+                                            <option value="Dermatology">Dermatology</option>
+                                            <option value="Pediatrics">Pediatrics</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">Select Available Doctor <span style="color:#EF4444;">*</span></label>
+                                        <div id="doctorsListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto;">
+                                            <div style="padding: 16px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 13px;">
+                                                Select a department to view available doctors from hospital dataset.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 5. APPOINTMENT DATE & TIME SLOTS -->
+                                <div class="form-section-title">
+                                    <i data-lucide="clock" style="width:16px;height:16px;"></i> 5. Date &amp; Available Time Slots
+                                </div>
+                                <div class="form-grid-2" style="margin-bottom: 20px;">
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">Appointment Date <span style="color:#EF4444;">*</span></label>
+                                        <input type="date" id="apptDate" class="form-input" required onchange="handleDateOrDoctorChange()">
+                                    </div>
+
+                                    <!-- DOCTOR AVAILABILITY SCHEDULE RECOMMENDATION BOX -->
+                                    <div id="doctorScheduleRecommendation" style="grid-column: 1 / -1; display: none; margin-bottom: 14px; padding: 14px 16px; background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 12px;">
+                                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+                                            <span id="scheduleRecTitle" style="font-size: 13px; font-weight: 600; color: #166534;">
+                                                📅 Recommended Availability Schedule
+                                            </span>
+                                            <span style="font-size: 11px; color: #15803D; font-weight: 500;">Click any date to select</span>
+                                        </div>
+                                        <div id="recommendedDatesContainer" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                                    </div>
+
+                                    <div class="form-group" style="grid-column: 1 / -1;">
+                                        <label class="form-label">Select Available Time Slot <span style="color:#EF4444;">*</span></label>
+                                        <div id="slotsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px;">
+                                            <div style="grid-column: 1 / -1; padding: 12px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 12px;">
+                                                Select doctor and date to check slot availability.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 6. ADDITIONAL INFORMATION (Optional) -->
+                                <div class="form-section-title">
+                                    <i data-lucide="file-text" style="width:16px;height:16px;"></i> 6. Additional Clinical Info (Optional)
+                                </div>
+                                <div class="form-grid-2" style="margin-bottom: 24px;">
+                                    <div class="form-group">
+                                        <label class="form-label">Previous Medical History</label>
+                                        <input type="text" id="apptHistory" class="form-input" placeholder="e.g. Hypertension, Kidney stones">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Current Medications</label>
+                                        <input type="text" id="apptMeds" class="form-input" placeholder="e.g. Amlodipine 5mg">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Allergies</label>
+                                        <input type="text" id="apptAllergies" class="form-input" placeholder="e.g. Penicillin">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Additional Notes</label>
+                                        <input type="text" id="apptNotes" class="form-input" placeholder="Special requests or instructions">
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 16px; border-top: 1px solid #F1F5F9;">
+                                    <button type="button" onclick="closeAppointmentModal()" class="btn-pill-outline">Cancel</button>
+                                    <button type="submit" class="btn-pill-primary" style="display: flex; align-items: center; gap: 6px;">
+                                        Review Appointment Summary <i data-lucide="arrow-right" style="width:16px;height:16px;"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- RIGHT SIDE: ONLY WhatsApp QR Code -->
+                        <div class="qr-right-col">
+                            <div class="qr-card-clean" style="flex-direction: column; text-align: center; gap: 8px;">
+                                <img src="/static/images/twilio_qr.png" alt="WhatsApp QR Code" class="qr-code-img">
+                                <div style="font-size: 11px; font-weight: 800; color: #4338CA; margin-top: 4px;">
+                                    Scan this QR with WhatsApp to connect.
+                                </div>
+                                <div style="font-size: 10px; color: #64748B; font-weight: 500; line-height: 1.3;">
+                                    When you scan &amp; send join message, your phone number will automatically fill into the form!
+                                </div>
+                                <button type="button" onclick="checkLatestJoinedPhone(true)" class="btn-pill-outline" style="font-size: 11px; padding: 5px 12px; margin-top: 4px; border-color: #6366F1; color: #4338CA; background: #EEF2FF; font-weight: 700;">
+                                    📱 Detect Scanned Number Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- SUMMARY VIEW (Step 5)                     -->
+                <!-- ========================================= -->
+                <div id="bookingSummaryContainer" style="display: none;">
+                    <div style="margin-bottom: 16px; text-align: center;">
+                        <span style="padding: 4px 12px; background: #EEF2FF; color: #4338CA; border-radius: 20px; font-size: 12px; font-weight: 800;">
+                            FINAL APPOINTMENT CONFIRMATION
+                        </span>
+                        <h4 style="font-size: 18px; font-weight: 800; color: #1E1B4B; margin-top: 6px;">Verify Patient &amp; Booking Details</h4>
+                    </div>
+
+                    <div class="summary-card">
+                        <div class="summary-row">
+                            <span class="summary-label">Patient Name:</span>
+                            <span class="summary-value" id="sumPatient">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Phone (WhatsApp):</span>
+                            <span class="summary-value" id="sumPhone">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Age / Gender:</span>
+                            <span class="summary-value" id="sumAgeGender">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Medical Condition:</span>
+                            <span class="summary-value" id="sumDisease">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Department:</span>
+                            <span class="summary-value" id="sumDepartment">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Assigned Doctor:</span>
+                            <span class="summary-value" id="sumDoctor">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Date &amp; Time Slot:</span>
+                            <span class="summary-value" id="sumDateTime">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Appointment Type:</span>
+                            <span class="summary-value" id="sumType">--</span>
+                        </div>
+                        <div class="summary-row">
+                            <span class="summary-label">Requested Diagnostics:</span>
+                            <span class="summary-value" id="sumDiagnostics">None</span>
+                        </div>
+                        <div class="summary-row" style="margin-top: 12px; padding-top: 12px; border-top: 2px solid #C7D2FE;">
+                            <span class="summary-label" style="color: #4338CA; font-weight: 800;">Status:</span>
+                            <span class="summary-value" style="color: #059669; font-weight: 800;">Ready to Book</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: space-between; margin-top: 24px;">
+                        <button type="button" onclick="backToForm()" class="btn-pill-outline" style="display: flex; align-items: center; gap: 6px;">
+                            <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Edit Details
+                        </button>
+                        <button type="button" id="confirmBookBtn" onclick="submitAppointmentBooking()" class="btn-pill-primary" style="padding: 12px 28px; font-size: 15px;">
+                            Confirm Appointment
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ========================================= -->
+                <!-- SUCCESS CARD VIEW                         -->
+                <!-- ========================================= -->
+                <div id="bookingSuccessContainer" style="display: none; text-align: center; padding: 20px 10px;">
+                    <div style="width: 64px; height: 64px; background: #D1FAE5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; color: #059669;">
+                        <i data-lucide="check-circle-2" style="width: 40px; height: 40px;"></i>
+                    </div>
+                    <h2 style="font-size: 24px; font-weight: 800; color: #065F46; margin-bottom: 6px;">
+                        Appointment Booked Successfully ✓
+                    </h2>
+                    <p style="font-size: 14px; color: #475569; margin-bottom: 24px;">
+                        Appointment record saved into hospital database with status <strong style="color:#059669;">CONFIRMED</strong>.
+                    </p>
+
+                    <!-- Details Card -->
+                    <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 20px; padding: 20px; text-align: left; max-width: 580px; margin: 0 auto 24px auto;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+                            <div><span style="color:#64748B;">Appointment ID:</span> <br><strong id="succApptId" style="font-size: 15px; color:#1E1B4B;">--</strong></div>
+                            <div><span style="color:#64748B;">Patient:</span> <br><strong id="succPatient">--</strong></div>
+                            <div><span style="color:#64748B;">Doctor:</span> <br><strong id="succDoctor">--</strong></div>
+                            <div><span style="color:#64748B;">Department:</span> <br><strong id="succDept">--</strong></div>
+                            <div><span style="color:#64748B;">Date &amp; Time:</span> <br><strong id="succDateTime">--</strong></div>
+                            <div><span style="color:#64748B;">Appointment Type:</span> <br><strong id="succType">--</strong></div>
+                            <div><span style="color:#64748B;">Diagnostics:</span> <br><strong id="succDiag">--</strong></div>
+                            <div>
+                                <span style="color:#64748B;">Twilio WhatsApp Engine:</span> <br>
+                                <span id="succTwilioBadge" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 800; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; margin-top: 2px;">
+                                    ● Twilio: CONNECTED
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp Status Banner -->
+                    <div id="succWhatsappStatusBox" style="padding: 16px; border-radius: 16px; margin-bottom: 24px; font-size: 13px; max-width: 580px; margin-left: auto; margin-right: auto; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                        <div id="succWhatsappMsg" style="font-weight: 600;"></div>
+                        <div id="resendWhatsappBtnContainer" style="display: none;">
+                            <button type="button" onclick="resendWhatsappAlert()" class="btn-pill-outline" style="font-size: 12px; padding: 6px 14px; border-color: #F59E0B; color: #D97706;">
+                                Resend WhatsApp
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button type="button" onclick="highlightCreatedAppointment()" class="btn-pill-primary">View Appointment</button>
+                        <button type="button" onclick="resetAndNewBooking()" class="btn-pill-outline">Book Another Appointment</button>
+                        <button type="button" onclick="closeAppointmentModal()" class="btn-pill-outline">Back to Appointments</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- JAVASCRIPT LOGIC                                          -->
+    <!-- ========================================================= -->
+    <script>
+    let selectedDoctor = '';
+    let selectedSlot = '';
+    let currentBookingData = null;
+    let createdApptId = null;
+    let autoFilledPhone = null;
+    let modalOpenedAt = 0;
+
+    async function checkLatestJoinedPhone(force = false) {
+        try {
+            const url = force ? '/api/whatsapp/latest-joined?force=true' : '/api/whatsapp/latest-joined';
+            const res = await safeFetchJson(url);
+            if (res && res.has_joined && res.phone_number) {
+                const phoneInput = document.getElementById('apptPhone');
+                if (phoneInput) {
+                    const currentVal = phoneInput.value.trim();
+                    const joinedTime = res.joined_at ? new Date(res.joined_at).getTime() : 0;
+                    // Allow auto-detection if force requested, or scanned in last 5 minutes, or phone input is empty
+                    const isRecentScan = joinedTime >= (Date.now() - 300000);
+
+                    if (force || isRecentScan || !currentVal || currentVal === autoFilledPhone) {
+                        if (force || !currentVal || currentVal === autoFilledPhone) {
+                            phoneInput.value = res.phone_number;
+                            autoFilledPhone = res.phone_number;
+                            checkPhoneSandboxStatus(res.phone_number);
+                        }
+                    }
+                }
+            }
+        } catch(e) {
+            console.warn('Auto-fill check error:', e);
+        }
+    }
+
+    // Poll every 3 seconds for new QR code joins
+    setInterval(checkLatestJoinedPhone, 3000);
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set min date to today
+        const dateInput = document.getElementById('apptDate');
+        if (dateInput) {
+            dateInput.min = new Date().toISOString().split('T')[0];
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+
+        loadApptChart();
+        lucide.createIcons();
+    });
+
+    function openAppointmentModal() {
+        document.getElementById('newApptModal').style.display = 'flex';
+        modalOpenedAt = Date.now();
+        resetFormState();
+        lucide.createIcons();
+    }
+
+    function closeAppointmentModal() {
+        document.getElementById('newApptModal').style.display = 'none';
+        resetFormState();
+    }
+
+    function resetFormState() {
+        modalOpenedAt = Date.now();
+        autoFilledPhone = null;
+        document.getElementById('newApptForm').reset();
+        
+        const phoneInput = document.getElementById('apptPhone');
+        if (phoneInput) phoneInput.value = '';
+        const statusBox = document.getElementById('phoneSandboxStatusBox');
+        if (statusBox) statusBox.style.display = 'none';
+        document.getElementById('bookingFormContainer').style.display = 'block';
+        document.getElementById('bookingSummaryContainer').style.display = 'none';
+        document.getElementById('bookingSuccessContainer').style.display = 'none';
+        document.getElementById('modalAlert').style.display = 'none';
+        document.getElementById('suggestedBox').style.display = 'none';
+        document.getElementById('deptAiTag').style.display = 'none';
+        selectedDoctor = '';
+        selectedSlot = '';
+        createdApptId = null;
+        
+        // Reset checkbox active states
+        document.querySelectorAll('.diag-pill-checkbox').forEach(lbl => lbl.classList.remove('active'));
+        
+        // Set date to today
+        const dateInput = document.getElementById('apptDate');
+        if (dateInput) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+        
+        // Reset doctors container
+        document.getElementById('doctorsListContainer').innerHTML = `
+            <div style="padding: 16px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 13px;">
+                Select a department to view available doctors from hospital dataset.
+            </div>
+        `;
+        
+        // Reset slots container
+        document.getElementById('slotsContainer').innerHTML = `
+            <div style="grid-column: 1 / -1; padding: 12px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 12px;">
+                Select doctor and date to check slot availability.
+            </div>
+        `;
+    }
+
+    function toggleDiagActive(chk) {
+        const parent = chk.closest('.diag-pill-checkbox');
+        if (parent) {
+            if (chk.checked) parent.classList.add('active');
+            else parent.classList.remove('active');
+        }
+    }
+
+    // Robust, safe API fetch helper with classified error handling
+    async function safeFetchJson(url, options = {}) {
+        let res;
+        try {
+            res = await fetch(url, options);
+        } catch (netErr) {
+            console.error("[Appointment Workflow] Connection failure:", netErr);
+            throw new Error("Unable to connect to the hospital service. Please check the server and try again.");
+        }
+
+        let data = null;
+        const contentType = res.headers.get("content-type") || "";
+
+        if (contentType.includes("application/json")) {
+            try {
+                data = await res.json();
+            } catch (jsonErr) {
+                console.error("[Appointment Workflow] Invalid JSON format from server:", jsonErr);
+                throw new Error("Hospital service returned an unparseable response.");
+            }
+        } else {
+            const textResp = await res.text();
+            console.error(`[Appointment Workflow] Non-JSON response (HTTP ${res.status}):`, textResp.substring(0, 300));
+            if (res.status === 404) {
+                throw new Error("Appointment service endpoint was not found.");
+            } else if (res.status === 500) {
+                throw new Error("Hospital appointment service encountered an internal error.");
+            } else if (res.status === 400) {
+                throw new Error("Invalid appointment request. Please check the entered details.");
+            } else {
+                throw new Error(`Hospital service error (HTTP ${res.status}).`);
+            }
+        }
+
+        if (!res.ok) {
+            let msg = (data && data.message) ? data.message : null;
+            if (!msg) {
+                if (res.status === 400) msg = "Invalid appointment request. Please check the entered details.";
+                else if (res.status === 404) msg = "Appointment service endpoint was not found.";
+                else if (res.status === 500) msg = "Hospital appointment service encountered an internal error.";
+                else msg = `Server error (HTTP ${res.status})`;
+            }
+            const err = new Error(msg);
+            err.data = data;
+            err.status = res.status;
+            throw err;
+        }
+
+        return data;
+    }
+
+    let phoneStatusTimeout = null;
+    async function checkPhoneSandboxStatus(phoneVal) {
+        if (phoneStatusTimeout) clearTimeout(phoneStatusTimeout);
+        const box = document.getElementById('phoneSandboxStatusBox');
+        if (!box) return;
+
+        if (!phoneVal || phoneVal.trim().length < 8) {
+            box.style.display = 'none';
+            return;
+        }
+
+        phoneStatusTimeout = setTimeout(async () => {
+            try {
+                const data = await safeFetchJson(`/api/whatsapp/check-status?phone=${encodeURIComponent(phoneVal)}`);
+                box.style.display = 'block';
+                if (data.sandbox_joined) {
+                    box.style.background = '#ECFDF5';
+                    box.style.color = '#065F46';
+                    box.style.border = '1.5px solid #A7F3D0';
+                    box.innerHTML = `✓ WhatsApp Connected • Ready for Appointment Notifications!`;
+                } else {
+                    box.style.background = '#FFFBEB';
+                    box.style.color = '#92400E';
+                    box.style.border = '1.5px solid #FCD34D';
+                    box.innerHTML = `
+                        <div>⚠ Scanned QR & joined Sandbox?</div>
+                        <button type="button" onclick="triggerWelcomeForCurrentPhone()" class="btn-pill-outline" style="font-size: 11px; padding: 4px 10px; margin-top: 6px; border-color: #F59E0B; color: #D97706; background: white;">
+                            📲 Confirm Join &amp; Receive Welcome Message
+                        </button>
+                    `;
+                }
+            } catch (e) {
+                box.style.display = 'none';
+            }
+        }, 400);
+    }
+
+    async function triggerWelcomeForCurrentPhone() {
+        const phoneElem = document.getElementById('apptPhone');
+        const phoneVal = phoneElem ? phoneElem.value.trim() : '';
+        if (!phoneVal) {
+            alert('Please enter your WhatsApp phone number first.');
+            return;
+        }
+
+        const box = document.getElementById('phoneSandboxStatusBox');
+        if (box) {
+            box.style.display = 'block';
+            box.style.background = '#EEF2FF';
+            box.style.color = '#4338CA';
+            box.style.border = '1.5px solid #C7D2FE';
+            box.innerHTML = `Connecting to WhatsApp service...`;
+        }
+
+        try {
+            const data = await safeFetchJson('/api/whatsapp/register-join', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phoneVal })
+            });
+
+            if (data.success) {
+                if (box) {
+                    box.style.background = '#ECFDF5';
+                    box.style.color = '#065F46';
+                    box.style.border = '1.5px solid #A7F3D0';
+                    box.innerHTML = `✓ WhatsApp Connected • Ready for Appointment Notifications!`;
+                }
+            } else {
+                alert(data.message || 'Could not register WhatsApp number.');
+            }
+        } catch (e) {
+            alert(e.message || 'Failed to connect to WhatsApp service.');
+        }
+    }
+
+    // Handle Disease selection change -> trigger condition analysis API
+    async function handleDiseaseChange() {
+        const disease = document.getElementById('apptDisease').value;
+        const symptoms = document.getElementById('apptSymptoms').value;
+        if (!disease) return;
+
+        try {
+            const data = await safeFetchJson('/api/appointments/analyze-condition', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disease: disease, symptoms: symptoms })
+            });
+
+            if (data.success && data.analysis) {
+                const analysis = data.analysis;
+
+                // 1. Update department selection
+                const deptSelect = document.getElementById('apptDepartment');
+                if (analysis.recommended_department) {
+                    deptSelect.value = analysis.recommended_department;
+                    const aiTag = document.getElementById('deptAiTag');
+                    if (analysis.is_ai_fallback) {
+                        aiTag.style.display = 'inline-block';
+                        aiTag.textContent = 'AI Suggested';
+                    } else {
+                        aiTag.style.display = 'none';
+                    }
+                    handleDepartmentChange();
+                }
+
+                // 2. Render suggested diagnostics
+                const diagBox = document.getElementById('suggestedBox');
+                const pillsContainer = document.getElementById('suggestedPillsContainer');
+                const aiTagDiag = document.getElementById('aiTagDiag');
+
+                if (analysis.suggested_diagnostics && analysis.suggested_diagnostics.length > 0) {
+                    diagBox.style.display = 'block';
+                    if (analysis.is_ai_fallback) aiTagDiag.style.display = 'inline-block';
+                    else aiTagDiag.style.display = 'none';
+
+                    pillsContainer.innerHTML = analysis.suggested_diagnostics.map(d => `
+                        <span class="suggested-pill" onclick="selectSuggestedDiag('${d}')">
+                            + ${d}
+                        </span>
+                    `).join('');
+                } else {
+                    diagBox.style.display = 'none';
+                }
+            }
+        } catch (e) {
+            console.error("Condition analysis notice:", e.message);
+        }
+    }
+
+    function selectSuggestedDiag(diagName) {
+        // Find matching checkbox or check 'Other'
+        const checkboxes = document.querySelectorAll('input[name="diagnostics"]');
+        let matched = false;
+        checkboxes.forEach(chk => {
+            if (chk.value.toLowerCase() === diagName.toLowerCase()) {
+                chk.checked = true;
+                toggleDiagActive(chk);
+                matched = true;
+            }
+        });
+        if (!matched) {
+            // Check 'Other' checkbox
+            checkboxes.forEach(chk => {
+                if (chk.value === 'Other') {
+                    chk.checked = true;
+                    toggleDiagActive(chk);
+                }
+            });
+        }
+    }
+
+    // Handle Department Selection Change -> query dataset doctors
+    async function handleDepartmentChange() {
+        const dept = document.getElementById('apptDepartment').value;
+        const dateVal = document.getElementById('apptDate').value;
+        const timeVal = selectedSlot || '';
+        const container = document.getElementById('doctorsListContainer');
+        selectedDoctor = '';
+
+        if (!dept) {
+            container.innerHTML = `
+                <div style="padding: 16px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 13px;">
+                    Select a department to view available doctors from hospital dataset.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = `<div style="padding: 16px; text-align: center; color: #64748B;">Querying doctor records from active dataset for ${dept}...</div>`;
+
+        try {
+            const data = await safeFetchJson(`/api/appointments/available-doctors?department=${encodeURIComponent(dept)}&date=${encodeURIComponent(dateVal)}&time=${encodeURIComponent(timeVal)}`);
+            
+            // Check state returned from backend
+            const state = data.state || (data.doctors && data.doctors.length > 0 ? 'AVAILABLE' : 'NO_DOCTORS_IN_DEPT');
+
+            if (state === 'AVAILABLE' && data.doctors && data.doctors.length > 0) {
+                // STATE 1 — Doctors found and available
+                let optionsHtml = data.doctors.map((doc, idx) => `
+                    <option value="${doc.name}" ${idx === 0 ? 'selected' : ''}>
+                        ${doc.name} — ${doc.department} (${doc.specialty || 'Specialist'}) — ${doc.status}
+                    </option>
+                `).join('');
+
+                let selectHtml = `
+                    <div style="margin-bottom: 12px;">
+                        <select id="apptDoctorDropdown" class="form-input" required onchange="onDoctorDropdownChange(this.value)">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+
+                let cardsHtml = data.doctors.map(doc => `
+                    <div class="doctor-card" onclick="selectDoctorCard(this, '${doc.name}')">
+                        <div>
+                            <div style="font-weight: 800; font-size: 14px; color: #1E1B4B; display: flex; align-items: center; gap: 8px;">
+                                ${doc.name}
+                                ${doc.is_ai_fallback ? '<span class="ai-suggested-tag">AI Suggested</span>' : ''}
+                            </div>
+                            <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
+                                ${doc.department} &bull; ${doc.specialty || 'Specialist'}
+                            </div>
+                        </div>
+                        <div>
+                            <span class="badge-status ${doc.status === 'Available' ? 'badge-success' : 'badge-warning'}">
+                                ${doc.status}
+                            </span>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = selectHtml + '<div style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto;">' + cardsHtml + '</div>';
+
+                // Select first doctor by default
+                const firstDoc = data.doctors[0].name;
+                selectedDoctor = firstDoc;
+                const dropdown = document.getElementById('apptDoctorDropdown');
+                if (dropdown) dropdown.value = firstDoc;
+                
+                const firstCard = container.querySelector('.doctor-card');
+                if (firstCard) firstCard.classList.add('selected');
+
+                handleDateOrDoctorChange();
+            } else if (state === 'UNAVAILABLE_DATE_TIME') {
+                // STATE 2 — Doctors exist in department, but none available for selected date/time
+                container.innerHTML = `
+                    <div style="padding: 16px; background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 14px; color: #92400E; font-size: 13px;">
+                        <strong>Doctors are available in this department, but none are available for the selected date/time.</strong>
+                        <div style="margin-top: 10px;">
+                            <button type="button" class="btn-pill-outline" onclick="document.getElementById('apptDate').focus()" style="font-size: 12px; padding: 6px 14px; border-color: #F59E0B; color: #D97706;">
+                                Choose another date
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // STATE 3 — No doctors exist for department in active dataset
+                container.innerHTML = `
+                    <div style="padding: 16px; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: 14px; color: #991B1B; font-size: 13px;">
+                        <strong>No doctors are currently assigned to this department.</strong>
+                        <div style="margin-top: 10px;">
+                            <button type="button" class="btn-pill-outline" onclick="document.getElementById('apptDepartment').focus()" style="font-size: 12px; padding: 6px 14px; border-color: #EF4444; color: #DC2626;">
+                                Choose another department
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="padding: 16px; color: #EF4444;">${e.message || 'Failed to load doctors list.'}</div>`;
+        }
+    }
+
+    function onDoctorDropdownChange(docName) {
+        selectedDoctor = docName;
+        // Sync cards UI selection
+        document.querySelectorAll('.doctor-card').forEach(c => {
+            if (c.textContent.includes(docName)) c.classList.add('selected');
+            else c.classList.remove('selected');
+        });
+        fetchDoctorScheduleRecommendation(docName);
+        handleDateOrDoctorChange();
+    }
+
+    function selectDoctorCard(cardElem, docName) {
+        document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+        cardElem.classList.add('selected');
+        selectedDoctor = docName;
+        const dropdown = document.getElementById('apptDoctorDropdown');
+        if (dropdown) dropdown.value = docName;
+        fetchDoctorScheduleRecommendation(docName);
+        handleDateOrDoctorChange();
+    }
+
+    async function fetchDoctorScheduleRecommendation(docName) {
+        const box = document.getElementById('doctorScheduleRecommendation');
+        const titleElem = document.getElementById('scheduleRecTitle');
+        const datesContainer = document.getElementById('recommendedDatesContainer');
+
+        if (!docName) {
+            if (box) box.style.display = 'none';
+            return;
+        }
+
+        try {
+            const data = await safeFetchJson(`/api/appointments/doctor-schedule?doctor=${encodeURIComponent(docName)}`);
+
+            if (data.success && data.recommended_dates && data.recommended_dates.length > 0) {
+                if (box) box.style.display = 'block';
+                const curDate = document.getElementById('apptDate').value;
+
+                // Auto-fill date input if not set yet
+                if (!curDate) {
+                    document.getElementById('apptDate').value = data.recommended_dates[0].date;
+                }
+
+                if (titleElem) {
+                    titleElem.innerHTML = `📅 <strong>${data.doctor}</strong> — Available on <strong>${data.total_available_days} upcoming days</strong>:`;
+                }
+
+                const activeDate = document.getElementById('apptDate').value;
+                if (datesContainer) {
+                    datesContainer.innerHTML = data.recommended_dates.map(rd => {
+                        const isSelected = activeDate === rd.date;
+                        return `
+                            <button type="button" class="rec-date-btn" onclick="selectRecommendedDate('${rd.date}')" style="padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid ${isSelected ? '#166534' : '#86EFAC'}; background: ${isSelected ? '#166534' : '#FFFFFF'}; color: ${isSelected ? '#FFFFFF' : '#14532D'}; transition: all 0.2s ease;">
+                                ${rd.display_label} • <span style="font-weight:700;">${rd.available_slots_count} slots</span>
+                            </button>
+                        `;
+                    }).join('');
+                }
+            } else {
+                if (box) box.style.display = 'none';
+            }
+        } catch (e) {
+            if (box) box.style.display = 'none';
+        }
+    }
+
+    function selectRecommendedDate(dateStr) {
+        const dateInput = document.getElementById('apptDate');
+        dateInput.value = dateStr;
+        handleDateOrDoctorChange();
+        if (selectedDoctor) fetchDoctorScheduleRecommendation(selectedDoctor);
+    }
+
+    // Handle Date or Doctor Selection -> query slot availability
+    async function handleDateOrDoctorChange() {
+        const dateVal = document.getElementById('apptDate').value;
+        const container = document.getElementById('slotsContainer');
+        selectedSlot = '';
+
+        if (!selectedDoctor) {
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; padding: 12px; text-align: center; color: #64748B; background: #F8FAFC; border-radius: 12px; font-size: 12px;">
+                    Select an available doctor to view schedule &amp; time slots.
+                </div>
+            `;
+            return;
+        }
+
+        if (!dateVal) {
+            fetchDoctorScheduleRecommendation(selectedDoctor);
+            return;
+        }
+
+        container.innerHTML = `<div style="grid-column: 1 / -1; padding: 12px; text-align: center; color: #64748B;">Checking slot availability...</div>`;
+
+        try {
+            const data = await safeFetchJson(`/api/appointments/available-slots?doctor=${encodeURIComponent(selectedDoctor)}&date=${encodeURIComponent(dateVal)}`);
+
+            if (data.state === 'UNAVAILABLE_DATE') {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 16px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; text-align: center;">
+                        <div style="color: #991B1B; font-weight: 600; font-size: 13px; margin-bottom: 8px;">
+                            ${data.message || 'No available time slots for this doctor on the selected date.'}
+                        </div>
+                        <div style="font-size:12px; color:#7F1D1D; margin-bottom:8px;">Please select another recommended date above or click below:</div>
+                        <button type="button" onclick="document.getElementById('apptDate').focus(); document.getElementById('apptDate').showPicker?.();" style="padding: 6px 14px; background: #DC2626; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 500;">
+                            Choose another date
+                        </button>
+                    </div>
+                `;
+                fetchDoctorScheduleRecommendation(selectedDoctor);
+                return;
+            }
+
+            if (data.state === 'UNAVAILABLE_DOCTOR') {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 16px; background: #FFFBEB; border: 1.5px solid #FDE68A; border-radius: 12px; text-align: center;">
+                        <div style="color: #92400E; font-weight: 600; font-size: 13px; margin-bottom: 8px;">
+                            ${data.message || 'This doctor is not available on the selected date.'}
+                        </div>
+                        <button type="button" onclick="document.getElementById('apptDepartment').focus();" style="padding: 6px 14px; background: #D97706; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 500;">
+                            Choose another doctor
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            if (data.success && Array.isArray(data.slots) && data.slots.length > 0) {
+                container.innerHTML = data.slots.map(s => `
+                    <button type="button" class="slot-btn ${!s.available ? 'disabled' : ''}" ${!s.available ? 'disabled' : ''} onclick="selectSlot(this, '${s.slot}')">
+                        ${s.slot} ${!s.available ? '<br><span style="font-size:9px; color:#EF4444;">Booked</span>' : ''}
+                    </button>
+                `).join('');
+
+                // Auto select first available slot
+                const firstAvailable = data.slots.find(s => s.available);
+                if (firstAvailable) {
+                    const btn = Array.from(container.querySelectorAll('.slot-btn')).find(b => b.textContent.includes(firstAvailable.slot));
+                    if (btn) selectSlot(btn, firstAvailable.slot);
+                }
+
+                fetchDoctorScheduleRecommendation(selectedDoctor);
+            } else {
+                container.innerHTML = `
+                    <div style="grid-column: 1 / -1; padding: 16px; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 12px; text-align: center;">
+                        <div style="color: #991B1B; font-weight: 600; font-size: 13px; margin-bottom: 8px;">
+                            No available time slots for this doctor on the selected date.
+                        </div>
+                        <button type="button" onclick="document.getElementById('apptDate').focus();" style="padding: 6px 14px; background: #DC2626; color: white; border: none; border-radius: 8px; font-size: 12px; cursor: pointer; font-weight: 500;">
+                            Choose another date
+                        </button>
+                    </div>
+                `;
+                fetchDoctorScheduleRecommendation(selectedDoctor);
+            }
+        } catch (e) {
+            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 12px; color: #EF4444; text-align: center;">${e.message || 'Error loading slots.'}</div>`;
+        }
+    }
+
+    function selectSlot(btnElem, slotTime) {
+        document.querySelectorAll('.slot-btn').forEach(b => b.classList.remove('selected'));
+        btnElem.classList.add('selected');
+        selectedSlot = slotTime;
+    }
+
+    function setElemText(id, text) {
+        const elem = document.getElementById(id);
+        if (elem) elem.textContent = text;
+    }
+
+    // Proceed to Step 5: Summary Card
+    function proceedToSummary() {
+        const name = (document.getElementById('apptPatientName')?.value || '').trim();
+        const phone = (document.getElementById('apptPhone')?.value || '').trim();
+        const age = (document.getElementById('apptAge')?.value || '').trim();
+        const gender = document.getElementById('apptGender')?.value || '';
+        const disease = document.getElementById('apptDisease')?.value || '';
+        const dept = document.getElementById('apptDepartment')?.value || '';
+        const dateVal = document.getElementById('apptDate')?.value || '';
+        const typeVal = document.getElementById('apptType')?.value || '';
+
+        const alertDiv = document.getElementById('modalAlert');
+        if (alertDiv) alertDiv.style.display = 'none';
+
+        // Validations
+        if (!name) return showAlert('Please enter Patient Full Name.');
+        if (!phone) return showAlert('Please enter a valid Phone Number for WhatsApp confirmation.');
+        if (!age) return showAlert('Please enter Age.');
+        if (!disease) return showAlert('Please select Disease / Medical Condition.');
+        if (!dept) return showAlert('Please select Department.');
+        if (!selectedDoctor) return showAlert('Please select an available Doctor.');
+        if (!dateVal) return showAlert('Please select Appointment Date.');
+        if (!selectedSlot) return showAlert('Please select an available Time Slot.');
+
+        // Diagnostics list
+        const diagChecked = Array.from(document.querySelectorAll('input[name="diagnostics"]:checked')).map(c => c.value);
+
+        const medHistElem = document.getElementById('apptMedHistory') || document.getElementById('apptHistory');
+        const medsElem = document.getElementById('apptMedications') || document.getElementById('apptMeds');
+        const allergiesElem = document.getElementById('apptAllergies');
+        const notesElem = document.getElementById('apptNotes');
+        const symptomsElem = document.getElementById('apptSymptoms');
+        const severityElem = document.getElementById('apptSeverity');
+
+        currentBookingData = {
+            patient_name: name,
+            phone: phone,
+            age: age,
+            gender: gender,
+            disease: disease,
+            symptoms: (symptomsElem?.value || '').trim(),
+            severity: severityElem?.value || 'Routine',
+            diagnostics: diagChecked,
+            department: dept,
+            doctor: selectedDoctor,
+            date: dateVal,
+            time: selectedSlot,
+            appointment_type: typeVal,
+            medical_history: (medHistElem?.value || '').trim(),
+            medications: (medsElem?.value || '').trim(),
+            allergies: (allergiesElem?.value || '').trim(),
+            notes: (notesElem?.value || '').trim()
+        };
+
+        // Render Summary fields safely
+        setElemText('sumPatient', name);
+        setElemText('sumPhone', phone);
+        setElemText('sumAgeGender', `${age} Yrs / ${gender}`);
+        setElemText('sumDisease', disease);
+        setElemText('sumDept', dept);
+        setElemText('sumDepartment', dept);
+        setElemText('sumDoctor', selectedDoctor);
+        setElemText('sumDateTime', `${dateVal} at ${selectedSlot}`);
+        setElemText('sumType', typeVal);
+        setElemText('sumDiag', diagChecked.length > 0 ? diagChecked.join(', ') : 'None');
+        setElemText('sumDiagnostics', diagChecked.length > 0 ? diagChecked.join(', ') : 'None');
+
+        const formBox = document.getElementById('bookingFormContainer');
+        const sumBox = document.getElementById('bookingSummaryContainer');
+        if (formBox) formBox.style.display = 'none';
+        if (sumBox) sumBox.style.display = 'block';
+    }
+
+    function backToForm() {
+        const formBox = document.getElementById('bookingFormContainer');
+        const sumBox = document.getElementById('bookingSummaryContainer');
+        if (formBox) formBox.style.display = 'block';
+        if (sumBox) sumBox.style.display = 'none';
+    }
+
+    function showAlert(msg, isSuccess = false) {
+        const div = document.getElementById('modalAlert');
+        if (!div) return;
+        div.style.display = 'block';
+        div.style.background = isSuccess ? '#ECFDF5' : '#FEF2F2';
+        div.style.color = isSuccess ? '#065F46' : '#991B1B';
+        div.style.border = isSuccess ? '1px solid #A7F3D0' : '1px solid #FCA5A5';
+        div.innerHTML = msg;
+    }
+
+    // Submit Appointment Booking to Server
+    async function submitAppointmentBooking() {
+        if (!currentBookingData) return;
+        const confirmBtn = document.getElementById('confirmBookBtn');
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Booking Appointment...';
+        }
+
+        try {
+            const data = await safeFetchJson('/api/appointments/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(currentBookingData)
+            });
+
+            if (data.success) {
+                createdApptId = data.appointment_id;
+
+                // Render success screen safely
+                setElemText('succApptId', data.appointment_id);
+                setElemText('succPatient', currentBookingData.patient_name);
+                setElemText('succDoctor', currentBookingData.doctor);
+                setElemText('succDept', currentBookingData.department);
+                setElemText('succDepartment', currentBookingData.department);
+                setElemText('succDateTime', `${currentBookingData.date} at ${currentBookingData.time}`);
+                setElemText('succType', currentBookingData.appointment_type);
+                setElemText('succDiag', currentBookingData.diagnostics.length > 0 ? currentBookingData.diagnostics.join(', ') : 'None');
+                setElemText('succDiagnostics', currentBookingData.diagnostics.length > 0 ? currentBookingData.diagnostics.join(', ') : 'None');
+
+                const waBox = document.getElementById('succWhatsappStatusBox');
+                const waMsg = document.getElementById('succWhatsappMsg');
+                const resendBtn = document.getElementById('resendWhatsappBtnContainer');
+
+                const smsRes = data.sms || data.whatsapp || {};
+                const isTwilioConnected = (data.twilio_status && data.twilio_status.connected) || smsRes.twilio_connected || (smsRes.mode && smsRes.mode !== 'mock');
+
+                // Update Twilio badges in modal
+                const modalBadge = document.getElementById('modalTwilioBadge');
+                if (modalBadge && data.twilio_status) {
+                    modalBadge.textContent = `● ${data.twilio_status.label}`;
+                    modalBadge.style.background = data.twilio_status.mock ? '#FEF3C7' : '#D1FAE5';
+                    modalBadge.style.color = data.twilio_status.mock ? '#92400E' : '#065F46';
+                    modalBadge.style.borderColor = data.twilio_status.mock ? '#FDE68A' : '#A7F3D0';
+                }
+
+                const succTwBadge = document.getElementById('succTwilioBadge');
+                if (succTwBadge) {
+                    if (isTwilioConnected) {
+                        succTwBadge.textContent = '● Twilio: CONNECTED';
+                        succTwBadge.style.background = '#D1FAE5';
+                        succTwBadge.style.color = '#065F46';
+                        succTwBadge.style.borderColor = '#A7F3D0';
+                    } else {
+                        succTwBadge.textContent = '● Twilio: MOCK MODE';
+                        succTwBadge.style.background = '#FEF3C7';
+                        succTwBadge.style.color = '#92400E';
+                        succTwBadge.style.borderColor = '#FDE68A';
+                    }
+                }
+
+                if (smsRes.success) {
+                    waBox.style.background = '#ECFDF5';
+                    waBox.style.border = '1.5px solid #A7F3D0';
+                    waBox.style.color = '#065F46';
+
+                    const twBadgeHtml = isTwilioConnected ? `
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0; display: inline-flex; align-items: center; gap: 4px;">
+                            ● Twilio: CONNECTED
+                        </span>
+                    ` : `
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;">
+                            ● Twilio: MOCK MODE
+                        </span>
+                    `;
+
+                    let messageText = smsRes.message || 'WhatsApp confirmation dispatched via Twilio • Connected';
+                    if (isTwilioConnected && (!smsRes.message || smsRes.message.includes('Mock Mode'))) {
+                        messageText = 'WhatsApp confirmation dispatched via Twilio • Connected';
+                    }
+
+                    const sidDetail = smsRes.sid ? `<div style="font-size: 11px; color: #047857; margin-top: 4px; font-family: monospace;">Dispatch SID: ${smsRes.sid} • Twilio WhatsApp Service</div>` : '';
+
+                    waMsg.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                            <div style="font-size: 14px; font-weight: 800;">✓ Appointment booked successfully.</div>
+                            ${twBadgeHtml}
+                        </div>
+                        <div style="font-size: 13px; font-weight: 600; color: #047857;">✓ ${messageText}</div>
+                        ${sidDetail}
+                    `;
+                    resendBtn.style.display = 'none';
+                } else {
+                    waBox.style.background = '#FFFBEB';
+                    waBox.style.border = '1.5px solid #FCD34D';
+                    waBox.style.color = '#92400E';
+                    const cleanReason = smsRes.error || data.message || 'WhatsApp confirmation could not be delivered.';
+                    waMsg.innerHTML = `
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                            <div style="font-size: 14px; font-weight: 800; color: #047857;">✓ Appointment booked successfully.</div>
+                            <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">
+                                ● Twilio: CONNECTED
+                            </span>
+                        </div>
+                        <div style="font-size: 13px; font-weight: 700; color: #D97706; margin-bottom: 4px;">⚠ ${cleanReason}</div>
+                    `;
+                    if (resendBtn) {
+                        resendBtn.style.display = 'block';
+                        resendBtn.innerHTML = `
+                            <button type="button" onclick="resendWhatsappAlert()" class="btn-pill-outline" style="font-size: 12px; padding: 6px 14px; border-color: #D97706; color: #D97706; background: white;">
+                                📱 Resend WhatsApp
+                            </button>
+                        `;
+                    }
+                }
+
+                // Add row to table dynamically
+                addAppointmentToTable(data.appointment, smsRes);
+
+                // Switch to success view
+                document.getElementById('bookingSummaryContainer').style.display = 'none';
+                document.getElementById('bookingSuccessContainer').style.display = 'block';
+                lucide.createIcons();
+            } else {
+                backToForm();
+                showAlert(data.message || 'Booking failed.');
+                handleDateOrDoctorChange();
+            }
+        } catch (e) {
+            backToForm();
+            showAlert(e.message || 'Hospital appointment service encountered an error.');
+            handleDateOrDoctorChange();
+        } finally {
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm Appointment';
+        }
+    }
+
+    async function resendWhatsappAlert() {
+        if (!createdApptId) return;
+        const phone = currentBookingData ? currentBookingData.phone : '';
+        try {
+            const data = await safeFetchJson(`/api/appointments/resend-whatsapp/${createdApptId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phone })
+            });
+
+            const waBox = document.getElementById('succWhatsappStatusBox');
+            const waMsg = document.getElementById('succWhatsappMsg');
+            const resendBtn = document.getElementById('resendWhatsappBtnContainer');
+            const smsRes = data.sms || data.whatsapp || {};
+            const isTwilioConnected = (data.twilio_status && data.twilio_status.connected) || smsRes.twilio_connected || (smsRes.mode && smsRes.mode !== 'mock');
+
+            if (data.success && smsRes.success) {
+                waBox.style.background = '#ECFDF5';
+                waBox.style.border = '1.5px solid #A7F3D0';
+                waBox.style.color = '#065F46';
+
+                let messageText = smsRes.message || 'WhatsApp confirmation dispatched via Twilio • Connected';
+                if (isTwilioConnected && (!smsRes.message || smsRes.message.includes('Mock Mode'))) {
+                    messageText = 'WhatsApp confirmation dispatched via Twilio • Connected';
+                }
+
+                const sidDetail = smsRes.sid ? `<div style="font-size: 11px; color: #047857; margin-top: 4px; font-family: monospace;">Dispatch SID: ${smsRes.sid} • Twilio WhatsApp Service</div>` : '';
+
+                waMsg.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                        <div style="font-size: 14px; font-weight: 800;">✓ Appointment booked successfully.</div>
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">
+                            ● Twilio: CONNECTED
+                        </span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 600; color: #047857;">✓ ${messageText}</div>
+                    ${sidDetail}
+                `;
+                resendBtn.style.display = 'none';
+            } else {
+                const cleanReason = smsRes.error || data.message || 'Resend failed';
+                waBox.style.background = '#FFFBEB';
+                waBox.style.border = '1.5px solid #FCD34D';
+                waBox.style.color = '#92400E';
+                waMsg.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
+                        <div style="font-size: 14px; font-weight: 800; color: #047857;">✓ Appointment booked successfully.</div>
+                        <span style="padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; background: #D1FAE5; color: #065F46; border: 1px solid #A7F3D0;">
+                            ● Twilio: CONNECTED
+                        </span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 700; color: #D97706; margin-bottom: 4px;">⚠ ${cleanReason}</div>
+                `;
+            }
+        } catch (e) {
+            alert(e.message || 'Error resending WhatsApp notification.');
+        }
+    }
+
+    function addAppointmentToTable(appt, waRes) {
+        const tbody = document.getElementById('appointmentsTableBody');
+        const emptyRow = document.getElementById('emptyApptRow');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.id = `appt-row-${appt.appointment_id}`;
+        tr.style.background = '#EEF2FF';
+
+        const notifStatus = (waRes && waRes.success) ? 'Sent' : 'Pending';
+
+        tr.innerHTML = `
+            <td><strong>${appt.appointment_id}</strong></td>
+            <td>${appt.patient_name}</td>
+            <td>${appt.doctor}</td>
+            <td>${appt.department}</td>
+            <td>${appt.date}</td>
+            <td>${appt.time}</td>
+            <td><span class="badge-status badge-info">${appt.priority || 'Routine'}</span></td>
+            <td><span class="badge-status badge-success">Confirmed</span></td>
+            <td><span class="badge-status badge-success" style="font-size:11px;">User Booked</span></td>
+            <td><span class="badge-status ${notifStatus === 'Sent' ? 'badge-success' : 'badge-warning'}">WhatsApp ${notifStatus}</span></td>
+        `;
+
+        tbody.insertBefore(tr, tbody.firstChild);
+
+        // Update total counter
+        const countSpan = document.getElementById('apptTotalCount');
+        if (countSpan) {
+            const cur = parseInt(countSpan.textContent) || 0;
+            countSpan.textContent = cur + 1;
+        }
+
+        loadApptChart();
+    }
+
+    function highlightCreatedAppointment() {
+        closeAppointmentModal();
+        if (createdApptId) {
+            const row = document.getElementById(`appt-row-${createdApptId}`);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.style.transition = 'background 0.5s ease';
+                row.style.background = '#C7D2FE';
+                setTimeout(() => {
+                    row.style.background = '#FFFFFF';
+                }, 3000);
+            }
+        }
+    }
+
+    function resetAndNewBooking() {
+        resetFormState();
+        document.getElementById('bookingFormContainer').style.display = 'block';
+        document.getElementById('bookingSuccessContainer').style.display = 'none';
+    }
+
+    async function loadApptChart() {
+        try {
+            const res = await fetch('/api/appointments/graph-data');
+            const data = await res.json();
+            if (data.success && data.labels && data.labels.length > 0 && typeof Plotly !== 'undefined') {
+                const colorMap = {
+                    'Scheduled': '#6366F1',
+                    'Confirmed': '#10B981',
+                    'Rescheduled': '#F59E0B',
+                    'Completed': '#3B82F6',
+                    'Cancelled': '#EF4444'
+                };
+                const colors = data.labels.map(l => colorMap[l] || '#94A3B8');
+                Plotly.newPlot('apptStatusChart', [{
+                    labels: data.labels,
+                    values: data.values,
+                    type: 'pie',
+                    marker: { colors: colors },
+                    textinfo: 'label+value',
+                    hole: 0.4
+                }], {
+                    margin: { t: 10, b: 10, l: 10, r: 10 },
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    showlegend: true,
+                    legend: { orientation: 'h', y: -0.2 }
+                }, { responsive: true });
+            }
+        } catch(e) { }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('newApptModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('newApptModal')) {
+            closeAppointmentModal();
+        }
+    });
+    </script>
+</body>
+</html>

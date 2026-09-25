@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Hospital Scenario — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/main.js" defer></script>
+    <script src="/static/js/upload.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">SCENARIOS</li>
+                <li><a href="/scenarios/create" class="sidebar-link active"><i data-lucide="sparkles" style="width:18px;height:18px;"></i> Create Scenario</a></li>
+                {% if active_scenario %}
+                    <li><a href="/scenarios/{{ active_scenario.id }}" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Active Scenario</a></li>
+                {% endif %}
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="history" style="width:18px;height:18px;"></i> Scenario History</a></li>
+                
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">OPERATIONS</li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="page-container">
+                <div style="margin-bottom: 28px;">
+                <div style="display: inline-block; padding: 6px 14px; background: #EEF2FF; color: #4F46E5; border-radius: 50px; font-weight: 700; font-size: 12px; margin-bottom: 8px;">
+                    SCENARIO-FIRST WORKFLOW
+                </div>
+                <h2 style="font-size: 28px; font-weight: 800; color: #1E1B4B;">Create New Hospital Scenario</h2>
+                <p style="font-size: 14px; color: #64748B;">Give CareSync AI your hospital data and describe the situation you want the agents to handle.</p>
+            </div>
+
+            {% if error_message %}
+            <div class="bg-rose-50 border border-rose-200 rounded-2xl p-5 mb-6 text-rose-800 text-sm font-semibold flex items-center gap-3">
+                <span class="text-xl">⚠️</span>
+                <span>{{ error_message }}</span>
+            </div>
+            {% endif %}
+
+            <form id="createScenarioForm" action="/api/scenarios/create" method="POST" enctype="multipart/form-data">
+                <!-- STEP 1 — SCENARIO DETAILS -->
+                <div class="content-card">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #6366F1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">1</div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1E293B;">Scenario Details</h3>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="scenario_name">Scenario Name</label>
+                        <input type="text" id="scenario_name" name="name" class="form-input" placeholder="e.g. Dengue Outbreak — 40 Patients" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="scenario_desc">Scenario Description</label>
+                        <textarea id="scenario_desc" name="description" class="form-input" rows="3" placeholder="Describe the background context for this hospital scenario (e.g. Sudden influx of patients due to seasonal outbreak or emergency event)..."></textarea>
+                    </div>
+                </div>
+
+                <!-- STEP 2 — UPLOAD DATASET -->
+                <div class="content-card">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #6366F1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px;">2</div>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1E293B;">Upload Scenario Dataset</h3>
+                    </div>
+
+                    <div id="datasetDropzone" style="border: 2px dashed #CBD5E1; border-radius: 20px; padding: 40px; text-align: center; cursor: pointer; background: white; transition: all 0.2s ease;">
+                        <div style="font-size: 40px; margin-bottom: 12px;">📁</div>
+                        <div style="font-size: 16px; font-weight: 700; color: #1E1B4B;">Upload CSV, Excel or JSON hospital data</div>
+                        <div style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 16px;">Drag & drop your file here or click Browse Files</div>
+                        <button type="button" class="btn-pill-primary">Browse Files</button>
+                        <input type="file" id="datasetFileInput" name="file" accept=".csv, .xlsx, .xls, .json" style="display: none;">
+                        <div style="font-size: 11px; color: #94A3B8; margin-top: 14px;">Supported: CSV, XLSX, XLS, JSON</div>
+                    </div>
+
+                    <div id="uploadStatusBox" style="display: none; margin-top: 20px; background: #F8FAFC; border-radius: 16px; padding: 18px; border: 1px solid #E2E8F0;">
+                        <h4 style="font-size: 13px; font-weight: 700; color: #312E81; margin-bottom: 8px;">File Inspection Status</h4>
+                        <ul id="progressList" style="list-style: none;"></ul>
+                    </div>
+
+                    {% if active_dataset %}
+                        <div style="margin-top: 16px; padding: 12px 16px; background: #ECFDF5; border-radius: 12px; font-size: 13px; color: #065F46; display: flex; align-items: center; justify-content: space-between;">
+                            <span>✓ Connected Pre-loaded Dataset: <strong>{{ active_dataset.filename }}</strong> ({{ active_dataset.row_count }} records)</span>
+                            <span style="font-size: 11px; font-weight: 700;">LIVE</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+
+
+                <!-- SUBMIT ACTION -->
+                <div style="margin-top: 24px; text-align: right;">
+                    <button type="submit" class="btn-pill-primary" style="padding: 16px 36px; font-size: 16px;">
+                        Create & Analyze Scenario →
+                    </button>
+                </div>
+            </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

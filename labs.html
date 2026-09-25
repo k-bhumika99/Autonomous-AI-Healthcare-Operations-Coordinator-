@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Diagnostics — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link active"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Scenarios</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-container">
+                <div style="margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="font-size: 24px; font-weight: 800; color: #1E1B4B;">Lab Diagnostics</h2>
+                    <p style="font-size: 14px; color: #64748B;">Diagnostic queues managed by Lab Agent.</p>
+                </div>
+                <a href="/data" class="btn-pill-outline">Manage Dataset</a>
+            </div>
+
+            <div class="content-card">
+                {% if labs and labs|length > 0 %}
+                    <div class="table-container">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Test ID</th>
+                                    <th>Patient</th>
+                                    <th>Test Name</th>
+                                    <th>Assigned Lab</th>
+                                    <th>Priority</th>
+                                    <th>Status</th>
+                                    <th>Turnaround</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for l in labs %}
+                                <tr>
+                                    <td><strong>{{ l.test_id }}</strong></td>
+                                    <td>{{ l.patient_name or l.patient_id }}</td>
+                                    <td>{{ l.test_name }}</td>
+                                    <td>{{ l.lab }}</td>
+                                    <td><span class="badge-status {% if l.priority == 'High' or l.priority == 'Emergency' %}badge-danger{% else %}badge-info{% endif %}">{{ l.priority }}</span></td>
+                                    <td><span class="badge-status {% if l.status == 'Rerouted' %}badge-warning{% elif l.status == 'Completed' %}badge-success{% else %}badge-info{% endif %}">{{ l.status }}</span></td>
+                                    <td>{{ l.turnaround or '30 mins' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state-box">
+                        <div class="empty-state-icon"><i data-lucide="flask-conical" style="width:32px;height:32px;"></i></div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: #1E293B;">No lab dataset uploaded</h3>
+                        <p style="font-size: 13px; color: #64748B; margin-top: 4px; margin-bottom: 16px;">Connect a hospital dataset to view lab diagnostics.</p>
+                        <a href="/data" class="btn-pill-primary">Upload Dataset</a>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agents Hub — CareSync AI</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg></div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">SCENARIOS</li>
+                <li><a href="/agents" class="sidebar-link active"><i data-lucide="bot" style="width:18px;height:18px;"></i> AI Agents Hub</a></li>
+                <li><a href="/scenarios/create" class="sidebar-link"><i data-lucide="sparkles" style="width:18px;height:18px;"></i> Create Scenario</a></li>
+                {% if active_scenario %}
+                    <li><a href="/scenarios/{{ active_scenario.id }}" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Active Scenario</a></li>
+                {% endif %}
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="history" style="width:18px;height:18px;"></i> Scenario History</a></li>
+                
+                <li style="margin-top: 12px; font-size: 11px; font-weight: 800; color: #94A3B8; letter-spacing: 1px; padding-left: 16px;">OPERATIONS</li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-container">
+                <!-- Header Banner -->
+                <div class="data-source-banner" style="background: white; border: 1px solid #E2E8F0; padding: 24px; margin-bottom: 28px; border-radius: 20px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="font-size: 11px; font-weight: 800; background: #EEF2FF; color: #6366F1; padding: 4px 12px; border-radius: 50px; text-transform: uppercase;">Autonomous Intelligence</span>
+                            {% if active_scenario %}
+                            <span style="font-size: 12px; color: #64748B;">Active Scenario: <strong>{{ active_scenario.name }}</strong></span>
+                            {% endif %}
+                        </div>
+                        <h2 style="font-size: 26px; font-weight: 800; color: #1E1B4B;">CareSync AI Agents Command Hub</h2>
+                        <p style="font-size: 14px; color: #64748B; margin-top: 4px;">Monitor live status, recent actions, and execute analysis across all 7 specialized hospital AI agents.</p>
+                    </div>
+                    <div>
+                        <button id="runAllAgentsBtn" class="btn-pill-primary" style="padding: 14px 28px; font-size: 15px;">
+                            ⚡ Execute All 7 Agents Now
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 7 AGENTS GRID CARDS -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-bottom: 32px;">
+
+                    <!-- 1. COORDINATOR AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_1_coordinator_3d.png" alt="Coordinator Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">🧠 Coordinator Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Orchestration &amp; Emergency Surge Verdict</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #6366F1; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #6366F1; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Coordinator'].action if agent_summaries['Coordinator'] else 'Orchestrates multi-agent workflows across all clinical modules, synthesizes operational data, and evaluates overall emergency surge capacity.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('coordinator')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/coordinator" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. BED MANAGEMENT AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_2_bed_management_3d.png" alt="Bed Management Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">🛏️ Bed Management Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Ward Occupancy &amp; ICU Allocation</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #10B981; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #10B981; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Bed Management'].action if agent_summaries['Bed Management'] else 'Monitors ward and ICU bed occupancy in real-time, optimizes bed allocation, and reserves available beds for incoming patient surges.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('bed-management')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/bed-management" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. LAB DIAGNOSTICS AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_3_lab_diagnostics_3d.png" alt="Lab Diagnostics Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">🧪 Lab Diagnostics Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Stat Diagnostic Processing &amp; Priority</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #F59E0B; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Lab'].action if agent_summaries['Lab'] else 'Tracks diagnostic testing queues, prioritizes emergency laboratory orders, and optimizes lab technician workload and turnaround times.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('labs')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/labs" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. PHARMACY AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_4_pharmacy_3d.png" alt="Pharmacy Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">💊 Pharmacy Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Medication Stock &amp; Shortage Tracking</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #EF4444; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #EF4444; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Pharmacy'].action if agent_summaries['Pharmacy'] else 'Monitors medicine inventory levels, detects critical drug shortages, and calculates emergency pharmaceutical demand.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('pharmacy')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/pharmacy" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. STAFFING AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_5_staffing_3d.png" alt="Staffing Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">🩺 Staffing Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Clinical Staff &amp; Doctor Roster</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #0EA5E9; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #0EA5E9; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Staffing'].action if agent_summaries['Staffing'] else 'Evaluates doctor and nursing shift coverage, identifies clinical staffing bottlenecks, and coordinates emergency personnel deployment.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('staffing')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/staffing" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6. APPOINTMENT AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_6_appointment_3d.png" alt="Appointment Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">📅 Appointment Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Outpatient Scheduling &amp; WhatsApp Notifications</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #3B82F6; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #3B82F6; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Appointment'].action if agent_summaries['Appointment'] else 'Schedules patient consultations, manages appointment capacity, and resolves scheduling conflicts to optimize doctor availability.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('appointments')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/appointment" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 7. DISCHARGE AGENT -->
+                    <div class="content-card" style="padding: 0; overflow: hidden; border-radius: 20px; border: 1px solid #E2E8F0; background: white; display: flex; flex-direction: column;">
+                        <div style="position: relative; height: 160px; overflow: hidden;">
+                            <img src="/static/images/agent_7_discharge_3d.png" alt="Discharge Agent" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,23,42,0.85) 0%, transparent 70%); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h3 style="font-size: 18px; font-weight: 800; color: white;">📋 Discharge Release Agent</h3>
+                                    <span class="badge-status badge-success" style="font-size: 11px;">● Active</span>
+                                </div>
+                                <span style="font-size: 12px; color: #CBD5E1; font-weight: 500;">Capacity Release &amp; Discharge Clearance</span>
+                            </div>
+                        </div>
+                        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 12px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">AGENT OVERVIEW</div>
+                                <div style="background: #F8FAFC; padding: 12px 14px; border-radius: 12px; border-left: 3px solid #059669; font-size: 13px; color: #334155; line-height: 1.5; margin-bottom: 16px;">
+                                    {{ agent_summaries['Discharge'].action if agent_summaries['Discharge'] else 'Screens admitted patients for discharge eligibility, clears discharge paperwork, and coordinates bed turnover to release capacity.' }}
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button onclick="runSingleAgent('discharge')" class="btn-pill-primary" style="flex: 1; font-size: 12px; padding: 10px; justify-content: center;">⚡ Run Analysis</button>
+                                {% if active_scenario %}
+                                <a href="/scenarios/{{ active_scenario.id }}/agents/discharge" class="btn-pill-outline" style="font-size: 12px; padding: 10px;">Inspect →</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let activeScenarioId = {{ active_scenario.id if active_scenario else 'null' }};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const runAllBtn = document.getElementById('runAllAgentsBtn');
+            if (runAllBtn) {
+                runAllBtn.addEventListener('click', async () => {
+                    if (!activeScenarioId) {
+                        showToast("Please create or select an active scenario first.", "warning");
+                        return;
+                    }
+                    runAllBtn.disabled = true;
+                    runAllBtn.innerText = '⚡ Executing All 7 Agents...';
+
+                    try {
+                        const res = await fetch(`/api/scenarios/${activeScenarioId}/run`, { method: 'POST' });
+                        const data = await res.json();
+                        if (data.success) {
+                            showToast("All 7 AI Agents executed successfully!", "success");
+                            setTimeout(() => window.location.reload(), 1200);
+                        } else {
+                            showToast(data.message || "Failed to execute agents.", "error");
+                            runAllBtn.disabled = false;
+                            runAllBtn.innerText = '⚡ Execute All 7 Agents Now';
+                        }
+                    } catch (err) {
+                        showToast("Network error executing agents.", "error");
+                        runAllBtn.disabled = false;
+                        runAllBtn.innerText = '⚡ Execute All 7 Agents Now';
+                    }
+                });
+            }
+        });
+
+        async function runSingleAgent(slug) {
+            if (!activeScenarioId) {
+                showToast("Please create or select an active scenario first.", "warning");
+                return;
+            }
+            showToast(`Executing ${slug} agent analysis...`, "info");
+            try {
+                const res = await fetch(`/api/scenarios/${activeScenarioId}/agents/${slug}/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(`${data.agent_name || slug} Agent completed analysis!`, "success");
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast(data.message || "Agent execution failed.", "error");
+                }
+            } catch (err) {
+                showToast("Network error executing agent.", "error");
+            }
+        }
+    </script>
+</body>
+</html>

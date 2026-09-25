@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareSync AI — Hospital Operations Intelligence</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <a href="/dashboard" class="logo">
+                <div class="logo-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/><path d="M12 8v6M9 11h6" stroke="#FFFFFF" stroke-width="2"/></svg>
+                </div>
+                <div class="logo-text">CareSync AI<span>Smarter Hospitals</span></div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li><a href="/dashboard" class="sidebar-link active"><i data-lucide="layout-dashboard" style="width:18px;height:18px;"></i> Dashboard</a></li>
+                <li><a href="/agents" class="sidebar-link"><i data-lucide="bot" style="width:18px;height:18px;"></i> AI Agents Hub</a></li>
+                <li><a href="/patients" class="sidebar-link"><i data-lucide="users" style="width:18px;height:18px;"></i> Patients</a></li>
+                <li><a href="/appointments" class="sidebar-link"><i data-lucide="calendar-days" style="width:18px;height:18px;"></i> Appointments</a></li>
+                <li><a href="/beds" class="sidebar-link"><i data-lucide="bed" style="width:18px;height:18px;"></i> Beds &amp; Wards</a></li>
+                <li><a href="/labs" class="sidebar-link"><i data-lucide="flask-conical" style="width:18px;height:18px;"></i> Lab Diagnostics</a></li>
+                <li><a href="/pharmacy" class="sidebar-link"><i data-lucide="pill" style="width:18px;height:18px;"></i> Pharmacy</a></li>
+                <li><a href="/staffing" class="sidebar-link"><i data-lucide="stethoscope" style="width:18px;height:18px;"></i> Staffing</a></li>
+                <li><a href="/discharge" class="sidebar-link"><i data-lucide="clipboard-check" style="width:18px;height:18px;"></i> Discharge</a></li>
+                <li><a href="/reports" class="sidebar-link"><i data-lucide="chart-column" style="width:18px;height:18px;"></i> Reports</a></li>
+                <li><a href="/data" class="sidebar-link"><i data-lucide="folder-open" style="width:18px;height:18px;"></i> Dataset Management</a></li>
+                <li><a href="/scenarios" class="sidebar-link"><i data-lucide="target" style="width:18px;height:18px;"></i> Scenarios</a></li>
+                <li style="margin-top: auto;"><a href="/api/auth/logout" class="sidebar-link" style="color: #EF4444;"><i data-lucide="log-out" style="width:18px;height:18px;"></i> Logout</a></li>
+            </ul>
+        </aside>
+
+        <!-- Main Content View -->
+        <main class="main-content">
+            <div class="page-container">
+                <!-- Top Search & User Bar -->
+            <div class="top-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="globalSearchInput" class="search-input" placeholder="Search patients, appointments, departments...">
+                </div>
+
+                <div class="top-user">
+                    <span style="font-size: 13px; font-weight: 600; color: #64748B;">Live Operations</span>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div>
+                            <div style="font-size: 13.5px; font-weight: 700; color: #1E293B;">{{ current_user.full_name if current_user else 'Dr. Jahnavi' }}</div>
+                            <div style="font-size: 11px; color: #64748B;">Hospital Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty Dataset Banner -->
+            {% if not data.has_data %}
+            <div class="data-source-banner" style="background: #FFFBEB; border: 1px solid #FCD34D;">
+                <div>
+                    <span style="font-size: 11px; font-weight: 800; color: #92400E; letter-spacing: 1px;">NO ACTIVE DATASET</span>
+                    <div style="margin-top: 4px; font-size: 14px; font-weight: 700; color: #78350F;">
+                        No active hospital dataset. Upload a dataset to activate CareSync AI.
+                    </div>
+                </div>
+                <div>
+                    <a href="/data" class="btn-pill-primary">+ Upload Dataset</a>
+                </div>
+            </div>
+            {% elif active_scenario %}
+            <div class="data-source-banner" style="background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%); border: 1px solid #C7D2FE;">
+                <div>
+                    <span style="font-size: 11px; font-weight: 800; color: #4338CA; letter-spacing: 1px;">ACTIVE SCENARIO WORKSPACE</span>
+                    <div style="margin-top: 4px; display: flex; align-items: center; gap: 12px;">
+                        <span class="ds-status-live">🎯 {{ active_scenario.name }}</span>
+                        <span style="font-size: 13px; font-weight: 600; color: #334155;">
+                            Priority: {{ active_scenario.priority }} • Status: {{ active_scenario.status }}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <a href="/scenarios/{{ active_scenario.id }}" class="btn-pill-primary">Open Scenario Workspace →</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Welcome Header -->
+            <div style="margin-bottom: 24px;">
+                <h2 style="font-size: 24px; font-weight: 800; color: #1E1B4B;">Welcome Back, {{ current_user.full_name.split()[0] if current_user else 'Dr. Jahnavi' }}!</h2>
+                <p style="font-size: 14px; color: #64748B;">Live hospital operational status and agent execution summary.</p>
+            </div>
+
+            <!-- KPI Cards Row -->
+            <div class="kpi-grid">
+                <div class="kpi-card" style="border-top: 4px solid #6366F1;">
+                    <div>
+                        <div class="kpi-title">Total Patients</div>
+                        <div class="kpi-value">{{ data.kpis.total_patients if data.has_data else 0 }}</div>
+                        <div style="font-size: 11px; color: {% if data.has_data %}#10B981{% else %}#94A3B8{% endif %}; margin-top: 4px;">
+                            {% if data.has_data %}↑ Live DB Count{% else %}No active dataset{% endif %}
+                        </div>
+                    </div>
+                    <div class="kpi-icon" style="background: #EEF2FF; color: #6366F1;"><i data-lucide="users" style="width:22px;height:22px;"></i></div>
+                </div>
+
+                <div class="kpi-card" style="border-top: 4px solid #EF4444;">
+                    <div>
+                        <div class="kpi-title">Emergency Patients</div>
+                        <div class="kpi-value">{{ data.kpis.emergency_patients if data.has_data else 0 }}</div>
+                        <div style="font-size: 11px; color: {% if data.has_data %}#EF4444{% else %}#94A3B8{% endif %}; margin-top: 4px;">
+                            {% if data.has_data %}↑ Triage Critical{% else %}No active dataset{% endif %}
+                        </div>
+                    </div>
+                    <div class="kpi-icon" style="background: #FEE2E2; color: #EF4444;"><i data-lucide="alert-triangle" style="width:22px;height:22px;"></i></div>
+                </div>
+
+                <div class="kpi-card" style="border-top: 4px solid #10B981;">
+                    <div>
+                        <div class="kpi-title">Available Beds</div>
+                        <div class="kpi-value">
+                            {% if data.has_data %}
+                                {{ data.kpis.available_beds }} / {{ data.kpis.total_beds }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </div>
+                        <div style="font-size: 11px; color: {% if data.has_data %}#10B981{% else %}#94A3B8{% endif %}; margin-top: 4px;">
+                            {% if data.has_data %}Capacity Live{% else %}No active dataset{% endif %}
+                        </div>
+                    </div>
+                    <div class="kpi-icon" style="background: #D1FAE5; color: #10B981;"><i data-lucide="bed" style="width:22px;height:22px;"></i></div>
+                </div>
+
+                <div class="kpi-card" style="border-top: 4px solid #3B82F6;">
+                    <div>
+                        <div class="kpi-title">Today's Appointments</div>
+                        <div class="kpi-value">{{ data.kpis.today_appointments if data.has_data else 0 }}</div>
+                        <div style="font-size: 11px; color: {% if data.has_data %}#3B82F6{% else %}#94A3B8{% endif %}; margin-top: 4px;">
+                            {% if data.has_data %}Scheduled{% else %}No active dataset{% endif %}
+                        </div>
+                    </div>
+                    <div class="kpi-icon" style="background: #DBEAFE; color: #3B82F6;"><i data-lucide="calendar-days" style="width:22px;height:22px;"></i></div>
+                </div>
+            </div>
+
+            <!-- Dashboard Columns: Hospital Overview & Agent Status -->
+            <div class="dashboard-columns">
+                <div class="content-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">Live Operational Overview</h3>
+                    {% if data.has_data %}
+                        <div id="dashboardOverviewChart" style="height: 280px;"></div>
+                    {% else %}
+                        <div style="padding: 48px; text-align: center; color: #94A3B8; background: #F8FAFC; border-radius: 12px; border: 1px dashed #CBD5E1;">
+                            <div style="font-size: 32px; margin-bottom: 8px;"><i data-lucide="chart-column" style="width:32px;height:32px;color:#6366F1;"></i></div>
+                            <div style="font-size: 15px; font-weight: 700; color: #1E293B;">No active dataset</div>
+                            <div style="font-size: 13px; color: #64748B; margin-top: 4px;">Upload a hospital dataset to generate live operational graphs.</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="content-card">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #1E293B; margin-bottom: 16px;">Specialized Agents Readiness</h3>
+                    <div class="agent-grid" style="grid-template-columns: 1fr; gap: 10px;">
+                        {% for name, info in data.agents.items() %}
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: #F8FAFC; border-radius: 10px;">
+                            <div>
+                                <strong style="font-size: 13px; color: #1E293B;">{{ name }}</strong>
+                                <div style="font-size: 11px; color: #64748B;">{{ info.actions }}</div>
+                            </div>
+                            <span class="badge-status {% if info.data_available %}badge-success{% else %}badge-info{% endif %}">
+                                {{ info.status }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            {% if data.has_data %}
+            if (typeof Plotly !== 'undefined') {
+                Plotly.newPlot('dashboardOverviewChart', [{
+                    x: ['Total Patients', 'Emergency', 'Free Beds', 'Appointments'],
+                    y: [{{ data.kpis.total_patients }}, {{ data.kpis.emergency_patients }}, {{ data.kpis.available_beds }}, {{ data.kpis.today_appointments }}],
+                    type: 'bar',
+                    marker: { color: ['#6366F1', '#EF4444', '#10B981', '#3B82F6'] }
+                }], { margin: { t: 10, b: 30 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)' });
+            }
+            {% endif %}
+        });
+    </script>
+</body>
+</html>
